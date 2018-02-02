@@ -75,7 +75,7 @@
 		bottomImageView.center = self.thisCenter;
 		//
 		topImageView.transform = CGAffineTransformMakeScale(0.8, 0.8);
-        topImageView.image = [UIImage imageForResourcePath:@"NxiCamera.bundle/camera_action_top_recording" ofType:@"png" inBundle:BUNDLE];
+        topImageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top_recording" ofType:@"png" inBundle:BUNDLE];
 		topImageView.center = self.thisCenter;
 	} completion:^(BOOL finished) {
 		[self start];
@@ -94,7 +94,7 @@
 		topImageView.center = self.thisCenter;
         
 	} completion:^(BOOL finished) {
-        topImageView.image = [UIImage imageForResourcePath:@"NxiCamera.bundle/camera_action_top" ofType:@"png" inBundle:BUNDLE];
+        topImageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top" ofType:@"png" inBundle:BUNDLE];
 	}];
 }
 #pragma mark -- tap event
@@ -198,7 +198,7 @@
 - (UIImageView *)topImageView {
 	if (topImageView) return topImageView;
 	UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
-	imageView.image = [UIImage imageForResourcePath:@"NxiCamera.bundle/camera_action_top" ofType:@"png" inBundle:BUNDLE];
+	imageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top" ofType:@"png" inBundle:BUNDLE];
 	imageView.userInteractionEnabled = NO;
 	imageView.center = self.thisCenter;
 	topImageView = imageView;
@@ -209,7 +209,7 @@
 - (UIImageView *)bottomImageView {
 	if (bottomImageView) return bottomImageView;
 	UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
-	imageView.image = [UIImage imageForResourcePath:@"NxiCamera.bundle/camera_action_bottom" ofType:@"png" inBundle:BUNDLE];
+	imageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_bottom" ofType:@"png" inBundle:BUNDLE];
 	imageView.userInteractionEnabled = NO;
 	imageView.center = self.thisCenter;
 	bottomImageView = imageView;

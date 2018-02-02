@@ -113,7 +113,7 @@
 		self.switchButton = [[UIButton alloc] initWithFrame:CGRectZero];
 		self.switchButton.frame = CGRectMake(0, 0, 29.0f + 20.0f, 22.0f + 20.0f);
 		//self.switchButton.tintColor = [UIColor whiteColor];
-		[self.switchButton setImage:[UIImage imageForResourcePath:@"NxiCamera.bundle/camera-switch" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
+		[self.switchButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera-switch" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
 		self.switchButton.imageEdgeInsets = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
 		[self.switchButton addTarget:self action:@selector(switchButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 		[self.view addSubview:self.switchButton];
@@ -314,7 +314,7 @@
 	_flashButton = [UIButton buttonWithType:UIButtonTypeSystem];
 	_flashButton.frame = CGRectMake(0, 0, 16.0f + 20.0f, 24.0f + 20.0f);
 	_flashButton.tintColor = [UIColor whiteColor];
-	[_flashButton setImage:[UIImage imageForResourcePath:@"NxiCamera.bundle/camera-flash" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
+	[_flashButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera-flash" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
 	_flashButton.imageEdgeInsets = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
 	[_flashButton addTarget:self action:@selector(flashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	return _flashButton;
@@ -372,7 +372,7 @@
 
 - (UIButton *)cancelButton {
 	if(!_cancelButton) {
-		UIImage *cancelImage = [UIImage imageForResourcePath:@"NxiCamera.bundle/cancel" ofType:@"png" inBundle:BUNDLE];
+		UIImage *cancelImage = [UIImage imageForResourcePath:@"NixCamera.bundle/cancel" ofType:@"png" inBundle:BUNDLE];
 		UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
 		button.tintColor = [UIColor whiteColor];
 		[button setImage:cancelImage forState:UIControlStateNormal];

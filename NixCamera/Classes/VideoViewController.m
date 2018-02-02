@@ -74,7 +74,7 @@
 
 - (UIButton *)cancelButton {
 	if(!_cancelButton) {
-		UIImage *cancelImage = [UIImage imageForResourcePath:@"NxiCamera.bundle/cancel" ofType:@"png" inBundle:BUNDLE];
+		UIImage *cancelImage = [UIImage imageForResourcePath:@"NixCamera.bundle/cancel" ofType:@"png" inBundle:BUNDLE];
 		UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
 		button.tintColor = [UIColor whiteColor];
 		[button setImage:cancelImage forState:UIControlStateNormal];
