@@ -62,11 +62,11 @@
 		6CCE7631E6622E22C4106AE0 /* Pods-NixCamera_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NixCamera_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NixCamera_Tests/Pods-NixCamera_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		71719F9E1E33DC2100824A3D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		A748AE93317BF01073F6412E /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		A748AE93317BF01073F6412E /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		A91192F157A92AAC973D646C /* Pods-NixCamera_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NixCamera_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-NixCamera_Example/Pods-NixCamera_Example.release.xcconfig"; sourceTree = "<group>"; };
 		BAA84592D40C77A3882B1432 /* Pods-NixCamera_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NixCamera_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NixCamera_Tests/Pods-NixCamera_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		C49D7B31D5DE87EAF2D3F14B /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		D600DC2895BC7B3E8D10CDFC /* NixCamera.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = NixCamera.podspec; path = ../NixCamera.podspec; sourceTree = "<group>"; };
+		C49D7B31D5DE87EAF2D3F14B /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		D600DC2895BC7B3E8D10CDFC /* NixCamera.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = NixCamera.podspec; path = ../NixCamera.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -250,6 +250,9 @@
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "fishkingsin@gmail.com";
 				TargetAttributes = {
+					6003F589195388D20070C39A = {
+						DevelopmentTeam = FLA95J3G7U;
+					};
 					6003F5AD195388D20070C39A = {
 						TestTargetID = 6003F589195388D20070C39A;
 					};
@@ -357,10 +360,12 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-NixCamera_Example/Pods-NixCamera_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CircleProgressView/CircleProgressView.framework",
 				"${BUILT_PRODUCTS_DIR}/NixCamera/NixCamera.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CircleProgressView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NixCamera.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -538,6 +543,7 @@
 			baseConfigurationReference = 2EE0E0C947196151A68F94F2 /* Pods-NixCamera_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = FLA95J3G7U;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NixCamera/NixCamera-Prefix.pch";
 				INFOPLIST_FILE = "NixCamera/NixCamera-Info.plist";
@@ -553,6 +559,7 @@
 			baseConfigurationReference = A91192F157A92AAC973D646C /* Pods-NixCamera_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = FLA95J3G7U;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NixCamera/NixCamera-Prefix.pch";
 				INFOPLIST_FILE = "NixCamera/NixCamera-Info.plist";

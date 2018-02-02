@@ -27,7 +27,9 @@ TODO: Add long description of the pod here.
   s.author           = { 'fishkingsin@gmail.com' => 'james.kong@nixplay.com' }
   s.source           = { :git => 'https://github.com/fishkingsin@gmail.com/NixCamera.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
-
+  s.resource_bundles = {
+      'NixCamera' => ['Assets/*.png', 'Assets/*.lproj']
+  }
   s.ios.deployment_target = '8.0'
 
   s.source_files = 'NixCamera/Classes/**/*'
@@ -39,4 +41,5 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency 'CircleProgressView'
 end
