@@ -23,7 +23,10 @@
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     NixCameraViewController *cameraViewController = [NixCameraViewController new];
 //    cameraViewController.delegate = self;
-    [self presentViewController:cameraViewController animated:YES completion:nil];
+    
+    UINavigationController *navVC = [[UINavigationController alloc] initWithRootViewController:cameraViewController];
+    
+    [self presentViewController:navVC animated:YES completion:nil];
 }
 
 - (void)didReceiveMemoryWarning

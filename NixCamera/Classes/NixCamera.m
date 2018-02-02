@@ -717,7 +717,7 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
     focusBox.cornerRadius = 5.0f;
     focusBox.bounds = CGRectMake(0.0f, 0.0f, 70, 60);
     focusBox.borderWidth = 3.0f;
-    focusBox.borderColor = [[UIColor yellowColor] CGColor];
+    focusBox.borderColor = [[UIColor whiteColor] CGColor];
     focusBox.opacity = 0.0f;
     [self.view.layer addSublayer:focusBox];
     

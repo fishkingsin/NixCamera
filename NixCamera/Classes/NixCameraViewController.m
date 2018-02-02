@@ -255,7 +255,7 @@
 }
 - (void)cancelButtonPressed:(UIButton *)button
 {
-	[self dismissViewControllerAnimated:YES completion:NO];
+	[self dismissViewControllerAnimated:YES completion:nil];
 }
 - (void)flashButtonPressed:(UIButton *)button
 {
