@@ -364,6 +364,7 @@
 	
 	[self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error) {
 		
+        
 		weakSelf.flashButton.hidden = NO;
 		weakSelf.switchButton.hidden = NO;
 		weakSelf.hintsLabel.hidden = NO;

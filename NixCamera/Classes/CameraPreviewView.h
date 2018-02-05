@@ -11,10 +11,10 @@
 @property (nonatomic, weak) id<CameraPreviewViewDelegate> delegate;
 @end
 @interface VideoAsset : NSObject
-@property (nonatomic, readonly) NSData *data;
+@property (nonatomic, readonly) NSURL *videoURL;
 @property (nonatomic, readonly) UIImage *preview;
 @property (nonatomic, readonly) NSTimeInterval duration;
 @property (nonatomic, readonly) AVAsset *asset;
-- (instancetype)initWithData:(NSData *)video preview:(UIImage *)image duration:(NSTimeInterval)interval asset:(AVAsset *)playerItemAsset;
+- (instancetype)initWithData:(NSURL *)videoURL preview:(UIImage *)image duration:(NSTimeInterval)interval asset:(AVAsset *)playerItemAsset;
 @end
 

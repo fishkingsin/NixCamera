@@ -9,6 +9,7 @@
 #import "CameraPreviewViewProtocol.h"
 #import "UIImage+Resources.h"
 #import <Masonry/Masonry.h>
+#import "UIImage+Configure.h"
 #define BUNDLE [NSBundle bundleForClass:[self class]]
 @interface CameraPreviewView ()<CameraPreviewViewProtocol>
 
@@ -116,22 +117,22 @@
             return;
         }
 //        UIView *delegateView = [UIApplication.sharedApplication.delegate window];
-//        [delegateView makeLoadingActivity:@"parpring ..."];
-//        UIImage *frame = [UIImage rs_fetchVideoPreViewImageWithUrl:videoURLPath];
-//        [CameraManager compressVideoWithUrl:videoURLPath completed:^(NSData * _Nullable data) {
-//            [delegateView hideLoadingActivity];
-//            if (!data) {
-//                NSLog(@"compress failed ");;
-//                return;
-//            }
-//            [delegateView makeToast:@"compress successed " duration:1.0 position:CSToastPositionCenter];
-//            NSTimeInterval duration = player.currentItem.duration.value / player.currentItem.duration.timescale;
-//            AVAsset *asset = player.currentItem.asset;
-//            VideoAsset *videoAsset = [[VideoAsset alloc] initWithData:data preview:frame duration:duration asset:asset];
-//            [_delegate preview:self captureVideoAsset:videoAsset];
-//            //
-//            [self clearContent:YES];
-//        }];
+        //        [delegateView makeLoadingActivity:@"parpring ..."];
+        UIImage *frame = [UIImage fetchVideoPreViewImageWithUrl:videoURLPath];
+        //        [CameraManager compressVideoWithUrl:videoURLPath completed:^(NSData * _Nullable data) {
+        //            [delegateView hideLoadingActivity];
+        //            if (!data) {
+        //                NSLog(@"compress failed ");;
+        //                return;
+        //            }
+        //            [delegateView makeToast:@"compress successed " duration:1.0 position:CSToastPositionCenter];
+        NSTimeInterval duration = player.currentItem.duration.value / player.currentItem.duration.timescale;
+        AVAsset *asset = player.currentItem.asset;
+        VideoAsset *videoAsset = [[VideoAsset alloc] initWithData:videoURLPath preview:frame duration:duration asset:asset];
+        [_delegate preview:self captureVideoAsset:videoAsset];
+        //            //
+        [self clearContent:YES];
+        //        }];
     }
 }
 
@@ -151,9 +152,8 @@
     [self addSubview:button];
     UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 10, 10);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.mas_left);
-        make.bottom.equalTo(self.mas_bottom);
-        make.edges.equalTo(self).with.insets(padding);
+        make.right.equalTo(self.mas_centerX).with.offset(-padding.right);
+        make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
         
     }];
     return button;
@@ -167,9 +167,8 @@
     [self addSubview:button];
     UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 10, 10);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.mas_right);
-        make.bottom.equalTo(self.mas_bottom);
-        make.edges.equalTo(self).with.insets(padding);
+        make.left.equalTo(self.mas_centerX).with.offset(padding.left);
+        make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
     }];
     return button;
 }
@@ -177,10 +176,10 @@
 
 @implementation VideoAsset
 
-- (instancetype)initWithData:(NSData *)video preview:(UIImage *)image duration:(NSTimeInterval)interval asset:(AVAsset *)playerItemAsset {
+- (instancetype)initWithData:(NSURL *)videoURL preview:(UIImage *)image duration:(NSTimeInterval)interval asset:(AVAsset *)playerItemAsset {
     self = [super init];
     if (self) {
-        _data = video;
+        _videoURL = videoURL;
         _preview = image;
         _duration = interval;
         _asset = playerItemAsset;
