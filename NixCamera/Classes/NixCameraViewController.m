@@ -146,6 +146,22 @@
     self.cancelButton.frame = CGRectMake(0, 0, 44, 44);
     [self onOrientationChange];
     
+//    [self.snapButton mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerX.equalTo(self.view.mas_centerX);
+//        make.bottom.equalTo(self.view.mas_bottom).with.offset(-50);
+//    }];
+//
+//    [self.flashButton mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(self.view.mas_left).with.offset(15);
+//        make.centerY.equalTo(self.snapButton.mas_centerY).with.offset(-15);
+//    }];
+//
+//    [self.switchButton mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.right.equalTo(self.view.mas_right).with.offset(-15);
+//        make.centerY.equalTo(self.snapButton.mas_centerY).with.offset(-15);
+//    }];
+
+    
     
     [self.view addSubview:self.previewView];
     [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -160,11 +176,13 @@
     
 }
 
+-(void) dealloc{
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+}
+
 -(void)viewDidAppear:(BOOL)animated{
-    
-    [[UIDevice currentDevice] setValue:
-     [NSNumber numberWithInteger: UIInterfaceOrientationPortrait    ]
-                                forKey:@"orientation"];
+ 
 }
 
 /* other lifecycle methods */
@@ -177,81 +195,78 @@
     
     self.hintsLabel.center = CGPointMake(self.view.size.width / 2.0f, self.view.size.height / 2.0f);
     self.hintsLabel.bottom = self.view.height - 15.0f;
-    [self onOrientationChange];
     [self.previewView setNeedsLayout];
+    
+    self.snapButton.center = self.view.contentCenter;
+    self.snapButton.bottom = self.view.bottom - 50.0f;
+    
+    self.flashButton.left = 5.0f;
+    self.flashButton.y = self.snapButton.y - 15.0f;
+    self.switchButton.y = self.snapButton.y - 15.0f;
+    self.switchButton.right = self.view.width - 5.0f;
+
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    float rotation;
-    
-    if (toInterfaceOrientation==UIInterfaceOrientationPortrait) {
-        rotation = 0;
-    }
-    else if (toInterfaceOrientation==UIInterfaceOrientationLandscapeLeft) {
-        rotation = M_PI/2;
-    } else if (toInterfaceOrientation==UIInterfaceOrientationLandscapeRight) {
-        rotation = -M_PI/2;
-    }
-    
-    
-}
-
-- (UIViewController*)topViewControllerWithRootViewController:(UIViewController*)rootViewController {
-    if ([rootViewController isKindOfClass:[UITabBarController class]]) {
-        UITabBarController* tabBarController = (UITabBarController*)rootViewController;
-        return [self topViewControllerWithRootViewController:tabBarController.selectedViewController];
-    } else if ([rootViewController isKindOfClass:[UINavigationController class]]) {
-        UINavigationController* navigationController = (UINavigationController*)rootViewController;
-        return [self topViewControllerWithRootViewController:navigationController.visibleViewController];
-    } else if (rootViewController.presentedViewController) {
-        UIViewController* presentedViewController = rootViewController.presentedViewController;
-        return [self topViewControllerWithRootViewController:presentedViewController];
-    } else {
-        return rootViewController;
-    }
-}
-
--(void) onOrientationChange {
-    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
-    if(currentOrientation == UIDeviceOrientationPortrait || currentOrientation == UIDeviceOrientationFaceUp){
-        self.snapButton.center = self.view.contentCenter;
-        self.snapButton.bottom = self.view.bottom - 50.0f;
-        self.flashButton.left = 5.0f;
-        self.flashButton.y = self.snapButton.y - 15.0f;
-        self.switchButton.y = self.snapButton.y - 15.0f;
-        self.switchButton.right = self.view.width - 5.0f;
-        
-    }else if(currentOrientation == UIDeviceOrientationLandscapeLeft){
-        
-        self.snapButton.center = self.view.contentCenter;
-        self.snapButton.right = self.view.right - 50.0f;
-        
-        self.flashButton.x = self.snapButton.x - 5.0f;
-        self.flashButton.bottom = self.view.bottom - 15.0f;
-        
-        self.switchButton.top = self.view.top + 15.0f;
-        self.switchButton.x = self.snapButton.x - 5.0f;
-        
-    }else if(currentOrientation == UIDeviceOrientationLandscapeRight){
-        
-        self.snapButton.center = self.view.contentCenter;
-        
-        self.snapButton.left = self.view.left + 50.0f;
-        
-        self.flashButton.x = self.snapButton.x - 5.0f;
-        self.flashButton.top = self.view.top + 15.0f;
-        
-        self.switchButton.bottom = self.view.bottom - 15.0f;
-        self.switchButton.x = self.snapButton.x - 5.0f;
-        
-    }
-}
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidRotate:) name:UIDeviceOrientationDidChangeNotification object:nil];
+    
+    
     // start the camera
     [self.camera start];
+}
+
+- (void)deviceDidRotate:(NSNotification *)notification
+{
+    UIDeviceOrientation currentDeviceOrientation = [[UIDevice currentDevice] orientation];
+    if (currentDeviceOrientation==UIInterfaceOrientationPortrait) {
+
+    } else if (currentDeviceOrientation==UIInterfaceOrientationLandscapeLeft) {
+
+    } else if (currentDeviceOrientation==UIInterfaceOrientationLandscapeRight) {
+
+    }
+
+}
+
+-(void) onOrientationChange {
+//    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
+    
+//    if(currentOrientation == UIDeviceOrientationPortrait || currentOrientation == UIDeviceOrientationFaceUp){
+//        self.snapButton.center = self.view.contentCenter;
+//        self.snapButton.bottom = self.view.bottom - 50.0f;
+//        self.flashButton.left = 5.0f;
+//        self.flashButton.y = self.snapButton.y - 15.0f;
+//        self.switchButton.y = self.snapButton.y - 15.0f;
+//        self.switchButton.right = self.view.width - 5.0f;
+//
+//    }else if(currentOrientation == UIDeviceOrientationLandscapeLeft){
+//
+//        self.snapButton.center = self.view.contentCenter;
+//        self.snapButton.right = self.view.right - 50.0f;
+//
+//        self.flashButton.x = self.snapButton.x - 5.0f;
+//        self.flashButton.bottom = self.view.bottom - 15.0f;
+//
+//        self.switchButton.top = self.view.top + 15.0f;
+//        self.switchButton.x = self.snapButton.x - 5.0f;
+//
+//    }else if(currentOrientation == UIDeviceOrientationLandscapeRight){
+//
+//        self.snapButton.center = self.view.contentCenter;
+//
+//        self.snapButton.left = self.view.left + 50.0f;
+//
+//        self.flashButton.x = self.snapButton.x - 5.0f;
+//        self.flashButton.top = self.view.top + 15.0f;
+//
+//        self.switchButton.bottom = self.view.bottom - 15.0f;
+//        self.switchButton.x = self.snapButton.x - 5.0f;
+//
+//    }
 }
 
 /* camera button methods */
@@ -295,7 +310,7 @@
 }
 
 - (BOOL)shouldAutorotate{
-    return !self.camera.isRecording;
+    return NO;
 }
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations{
     return UIInterfaceOrientationMaskPortrait ;
@@ -369,23 +384,32 @@
     weakSelf.switchButton.hidden = YES;
     weakSelf.hintsLabel.hidden = YES;
     
-    //    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
-    //    [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:currentOrientation] forKey:@"orientation"];
-    
-    [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error) {
+    [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image) {
         
         weakSelf.flashButton.hidden = NO;
         weakSelf.switchButton.hidden = NO;
         weakSelf.hintsLabel.hidden = NO;
         
-        if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
-            
-            return;
+        if(!error) {
+            if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
+                
+                return;
+            }
+            [weakSelf.previewView showMediaContentVideo:outputURL withType:Enum_VideoURLPath];
+            weakSelf.previewView.hidden = NO;
+        }else if(image){
+            NSLog(@"An error has occured: %@", error);
+            if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
+                
+                return;
+            }
+            [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
+            weakSelf.previewView.hidden = NO;
+        }else{
+            NSLog(@"An error has occured: %@", error);
         }
-        [weakSelf.previewView showMediaContentVideo:outputURL withType:Enum_VideoURLPath];
-        weakSelf.previewView.hidden = NO;
-        //        VideoViewController *vc = [[VideoViewController alloc] initWithVideoUrl:outputFileUrl];
-        //        [weakSelf.navigationController pushViewController:vc animated:YES];
+        
+        
         
     }];
 }
@@ -430,12 +454,13 @@
 
 - (void)previewDidCancel:(UIView *)preview {
     NSLog(@"preview return continue photo taking");
+    [self.previewView clearContent:YES];
+    self.previewView.hidden = YES;
     if (![self.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
         NSLog(@" %@ Not implementation RunsCameraPreviewViewProtocol", self.previewView);
         return;
     }
-    [self.previewView clearContent:YES];
-    self.previewView.hidden = YES;
+    
     
 }
 

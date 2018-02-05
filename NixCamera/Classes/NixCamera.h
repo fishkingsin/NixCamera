@@ -32,7 +32,8 @@ typedef enum : NSUInteger {
     NixCameraErrorCodeCameraPermission = 10,
     NixCameraErrorCodeMicrophonePermission = 11,
     NixCameraErrorCodeSession = 12,
-    NixCameraErrorCodeVideoNotEnabled = 13
+    NixCameraErrorCodeVideoNotEnabled = 13,
+    NixCameraErrorCodeVideoTooShort = 14
 } NixCameraErrorCode;
 
 @interface NixCamera : UIViewController
@@ -182,7 +183,7 @@ typedef enum : NSUInteger {
 /*
  * Start recording a video with a completion block. Video is saved to the given url.
  */
-- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error))completionBlock;
+- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image))completionBlock;
 
 /**
  * Stop recording video.

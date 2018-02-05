@@ -162,8 +162,10 @@
     [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/camera_preview_back" ofType:@"png" inBundle:BUNDLE]   forState:UIControlStateNormal];
     [button addTarget:self action:@selector(onBackToCamera) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:button];
-    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 10, 10);
+    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 50, 10);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(65);
+        make.height.mas_equalTo(65);
         make.right.equalTo(self.mas_centerX).with.offset(-padding.right);
         make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
         
@@ -177,10 +179,14 @@
     [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/camera_preview_finished" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
     [button addTarget:self action:@selector(onConfirmContent) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:button];
-    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 10, 10);
+    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 50, 10);
+    
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(65);
+        make.height.mas_equalTo(65);
         make.left.equalTo(self.mas_centerX).with.offset(padding.left);
         make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
+        
     }];
     return button;
 }
