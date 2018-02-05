@@ -53,13 +53,7 @@
 	
 	self.avPlayerLayer.frame = CGRectMake(0, 0, screenRect.size.width, screenRect.size.height);
     [self.view.layer addSublayer:self.avPlayerLayer];
-    
-    [self.view mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerY.equalTo(self.view.mas_centerY);
-        make.centerX.equalTo(self.view.mas_centerX);
-        make.width.equalTo(self.view.mas_width);
-        make.height.equalTo(self.view.mas_height);
-    }];
+
     
 	// cancel button
 	[self.view addSubview:self.cancelButton];

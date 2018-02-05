@@ -12,6 +12,10 @@
 #import "VideoViewController.h"
 #import <CircleProgressView/CircleProgressView-Swift.h>
 #import "UIImage+Resources.h"
+#import "CameraPreviewViewDelegate.h"
+#import "CameraControllerDelegate.h"
+#import "CameraPreviewViewProtocol.h"
+#import "CameraPreviewView.h"
 #define BUNDLE [NSBundle bundleForClass:[self class]]
 @interface NixCameraViewController ()
 @property (strong, nonatomic) NixCamera *camera;
@@ -21,10 +25,12 @@
 @property (strong, nonatomic) UIButton *switchButton;
 @property (strong, nonatomic) UIButton *flashButton;
 @property (strong, nonatomic) UIButton *cancelButton;
+@property (strong, nonatomic) CameraPreviewView<CameraPreviewViewProtocol> *previewView;
 @end
 
-@implementation NixCameraViewController
-
+@implementation NixCameraViewController{
+    
+}
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
@@ -138,6 +144,9 @@
 	[self.view addSubview:self.cancelButton];
 	self.cancelButton.frame = CGRectMake(0, 0, 44, 44);
     [self onOrientationChange];
+    
+    
+    [self.view addSubview:self.previewView];
 //    self.snapButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
 //    self.flashButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
 //    self.switchButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
@@ -325,8 +334,15 @@
 	__weak typeof(self) weakSelf = self;
 	[self.camera capture:^(NixCamera *camera, UIImage *image, NSDictionary *metadata, NSError *error) {
 		if(!error) {
-			ImageViewController *imageVC = [[ImageViewController alloc] initWithImage:image];
-			[weakSelf presentViewController:imageVC animated:NO completion:nil];
+//            ImageViewController *imageVC = [[ImageViewController alloc] initWithImage:image];
+//            [weakSelf presentViewController:imageVC animated:NO completion:nil];
+            
+            if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
+                
+                return;
+            }
+            [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
+            weakSelf.previewView.hidden = NO;
 		}
 		else {
 			NSLog(@"An error has occured: %@", error);
@@ -351,8 +367,15 @@
 		weakSelf.flashButton.hidden = NO;
 		weakSelf.switchButton.hidden = NO;
 		weakSelf.hintsLabel.hidden = NO;
-		VideoViewController *vc = [[VideoViewController alloc] initWithVideoUrl:outputFileUrl];
-		[weakSelf.navigationController pushViewController:vc animated:YES];
+        
+        if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
+            
+            return;
+        }
+        [weakSelf.previewView showMediaContentVideo:outputURL withType:Enum_VideoURLPath];
+        weakSelf.previewView.hidden = NO;
+//        VideoViewController *vc = [[VideoViewController alloc] initWithVideoUrl:outputFileUrl];
+//        [weakSelf.navigationController pushViewController:vc animated:YES];
 		
 	}];
 }
@@ -383,6 +406,44 @@
 	}
 	
 	return _cancelButton;
+}
+-(CameraPreviewView*)previewView{
+    if(_previewView != nil) return _previewView;
+    _previewView = [[CameraPreviewView<CameraPreviewViewProtocol> alloc] initWithFrame:self.view.frame];
+    _previewView.hidden = YES;
+    _previewView.delegate = self;
+    return _previewView;
+}
+
+#pragma mark -- RunsCameraPreviewViewDelegate
+
+- (void)previewDidCancel:(UIView *)preview {
+    NSLog(@"preview return continue photo taking");
+    if (![self.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
+        NSLog(@" %@ Not implementation RunsCameraPreviewViewProtocol", self.previewView);
+        return;
+    }
+    [self.previewView clearContent:YES];
+    self.previewView.hidden = YES;
+    
+}
+
+- (void)preview:(UIView *)preview captureStillImage:(UIImage *)image {
+    NSLog(@"Preview finished  return picture");
+    if (_delegate && [_delegate respondsToSelector:@selector(cameraViewController:captureStillImage:)]) {
+        [_delegate cameraViewController:self captureStillImage:image];
+    }
+    [self.previewView clearContent:YES];
+    self.previewView.hidden = YES;
+}
+
+- (void)preview:(UIView *)preview captureVideoAsset:(VideoAsset *)asset {
+    NSLog(@"Preview finished  return video");
+    if (_delegate && [_delegate respondsToSelector:@selector(cameraViewController:captureVideoAsset:)]) {
+        [_delegate cameraViewController:self captureVideoAsset:asset];
+    }
+    [self.previewView clearContent:YES];
+    self.previewView.hidden = YES;
 }
 
 @end

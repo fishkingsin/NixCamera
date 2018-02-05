@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "NixCamera.h"
 #import "CircleButtonView.h"
-@interface NixCameraViewController : UIViewController <CircleButtonViewDelegate>
-
+#import "CameraControllerDelegate.h"
+#import "CameraPreviewViewDelegate.h"
+@interface NixCameraViewController : UIViewController <CircleButtonViewDelegate, CameraPreviewViewDelegate>
+@property (nonatomic, weak) id<CameraControllerDelegate> delegate;
 @end
