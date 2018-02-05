@@ -361,11 +361,13 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-NixCamera_Example/Pods-NixCamera_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CircleProgressView/CircleProgressView.framework",
+				"${BUILT_PRODUCTS_DIR}/Masonry/Masonry.framework",
 				"${BUILT_PRODUCTS_DIR}/NixCamera/NixCamera.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CircleProgressView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Masonry.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NixCamera.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;

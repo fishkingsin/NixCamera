@@ -137,7 +137,7 @@
 	
 	[self.view addSubview:self.cancelButton];
 	self.cancelButton.frame = CGRectMake(0, 0, 44, 44);
-	
+    [self onOrientationChange];
 //    self.snapButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
 //    self.flashButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
 //    self.switchButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
@@ -194,11 +194,6 @@
 	}
 }
 
-//- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration{
-//
-//    NSLog(@"willRotateToInterfaceOrientation %li %f",(long)toInterfaceOrientation, duration );
-//    [self onOrientationChange];
-//}
 -(void) onOrientationChange {
 	UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
 	if(currentOrientation == UIDeviceOrientationPortrait || currentOrientation == UIDeviceOrientationFaceUp){
