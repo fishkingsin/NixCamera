@@ -22,6 +22,7 @@
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     NixCameraViewController *cameraViewController = [NixCameraViewController new];
+    cameraViewController.videoInterval = 15;
     cameraViewController.delegate = self;
     
     UINavigationController *navVC = [[UINavigationController alloc] initWithRootViewController:cameraViewController];

@@ -46,7 +46,7 @@
 	self.camera = [[NixCamera alloc] initWithQuality:AVCaptureSessionPresetHigh
 												 position:NixCameraPositionRear
 											 videoEnabled:YES];
-	self.camera.maximumVideoDuration = 15;
+	self.camera.maximumVideoDuration = self.videoInterval;
 	// attach to a view controller
 	[self.camera attachToViewController:self withFrame:CGRectMake(0, 0, screenRect.size.width, screenRect.size.height)];
 	

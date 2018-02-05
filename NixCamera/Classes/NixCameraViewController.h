@@ -13,4 +13,5 @@
 #import "CameraPreviewViewDelegate.h"
 @interface NixCameraViewController : UIViewController <CircleButtonViewDelegate, CameraPreviewViewDelegate>
 @property (nonatomic, weak) id<CameraControllerDelegate> delegate;
+@property (nonatomic,assign) NSTimeInterval videoInterval;
 @end
