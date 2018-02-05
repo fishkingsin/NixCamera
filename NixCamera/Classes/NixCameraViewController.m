@@ -16,6 +16,7 @@
 #import "CameraControllerDelegate.h"
 #import "CameraPreviewViewProtocol.h"
 #import "CameraPreviewView.h"
+#import <Masonry/Masonry.h>
 #define BUNDLE [NSBundle bundleForClass:[self class]]
 @interface NixCameraViewController ()
 @property (strong, nonatomic) NixCamera *camera;
@@ -147,6 +148,12 @@
     
     
     [self.view addSubview:self.previewView];
+    [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.view.mas_centerX);
+        make.centerY.equalTo(self.view.mas_centerY);
+        make.width.equalTo(self.view.mas_width);
+        make.height.equalTo(self.view.mas_height);
+    }];
 //    self.snapButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
 //    self.flashButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
 //    self.switchButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
@@ -171,6 +178,7 @@
 	self.hintsLabel.center = CGPointMake(self.view.size.width / 2.0f, self.view.size.height / 2.0f);
 	self.hintsLabel.bottom = self.view.height - 15.0f;
 	[self onOrientationChange];
+    [self.previewView setNeedsLayout];
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
@@ -259,7 +267,9 @@
 }
 - (void)cancelButtonPressed:(UIButton *)button
 {
-	[self dismissViewControllerAnimated:YES completion:nil];
+    if (_delegate && [_delegate respondsToSelector:@selector(cameraViewControllerDidDismissed:)]) {
+        [_delegate cameraViewControllerDidDismissed:self];
+    }
 }
 - (void)flashButtonPressed:(UIButton *)button
 {
@@ -364,7 +374,6 @@
 	
 	[self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error) {
 		
-        
 		weakSelf.flashButton.hidden = NO;
 		weakSelf.switchButton.hidden = NO;
 		weakSelf.hintsLabel.hidden = NO;
@@ -402,7 +411,7 @@
 		button.layer.shadowOpacity = 0.4f;
 		button.layer.shadowRadius = 1.0f;
 		button.clipsToBounds = NO;
-		
+		[button addTarget:self action:@selector(cancelButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 		_cancelButton = button;
 	}
 	
@@ -413,6 +422,7 @@
     _previewView = [[CameraPreviewView<CameraPreviewViewProtocol> alloc] initWithFrame:self.view.frame];
     _previewView.hidden = YES;
     _previewView.delegate = self;
+    
     return _previewView;
 }
 

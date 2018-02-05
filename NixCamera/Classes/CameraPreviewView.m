@@ -24,20 +24,38 @@
 }
 
 - (void)dealloc {
-    //    [self hideLoadingActivity];
     NSLog(@"CameraPreviewView Release");
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+        [self setBackgroundColor:[UIColor blackColor]];
         [self addSubview:self.stillImageView];
+        [self.stillImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.mas_centerX);
+            make.centerY.equalTo(self.mas_centerY);
+            make.width.equalTo(self.mas_width);
+            make.height.equalTo(self.mas_height);
+        }];
         [self addSubview:self.backButton];
         [self addSubview:self.confirmButton];
+        
+        
     }
     return self;
 }
-
+-(void) layoutSubviews{
+    [super layoutSubviews];
+    if(player){
+        [playerLayer removeFromSuperlayer];
+        playerLayer.frame = self.frame;
+        player.externalPlaybackVideoGravity = AVLayerVideoGravityResizeAspectFill;
+        [self.layer addSublayer:playerLayer];
+        [self.layer insertSublayer:playerLayer atIndex:0];
+    }
+    
+}
 #pragma mark -- CameraPreviewViewProtocol
 
 - (void)showMediaContentImage:(UIImage *)image withType:(MediaContentType)type {
@@ -51,9 +69,8 @@
 - (void)showMediaContentVideo:(NSURL *)URLPath withType:(MediaContentType)type {
     contentType = type;
     videoURLPath = URLPath;
-    //
+    
     self.stillImageView.hidden = YES;
-    //
     player = [AVPlayer playerWithURL:URLPath];
     playerLayer = [AVPlayerLayer playerLayerWithPlayer:player];
     playerLayer.frame = self.frame;
@@ -116,23 +133,14 @@
             NSLog(@"delegate is not response to selector preview:captureVideoURL:");
             return;
         }
-//        UIView *delegateView = [UIApplication.sharedApplication.delegate window];
-        //        [delegateView makeLoadingActivity:@"parpring ..."];
         UIImage *frame = [UIImage fetchVideoPreViewImageWithUrl:videoURLPath];
-        //        [CameraManager compressVideoWithUrl:videoURLPath completed:^(NSData * _Nullable data) {
-        //            [delegateView hideLoadingActivity];
-        //            if (!data) {
-        //                NSLog(@"compress failed ");;
-        //                return;
-        //            }
-        //            [delegateView makeToast:@"compress successed " duration:1.0 position:CSToastPositionCenter];
+        
         NSTimeInterval duration = player.currentItem.duration.value / player.currentItem.duration.timescale;
         AVAsset *asset = player.currentItem.asset;
         VideoAsset *videoAsset = [[VideoAsset alloc] initWithData:videoURLPath preview:frame duration:duration asset:asset];
         [_delegate preview:self captureVideoAsset:videoAsset];
-        //            //
         [self clearContent:YES];
-        //        }];
+        
     }
 }
 
@@ -140,7 +148,11 @@
     if (stillImageView) return stillImageView;
     UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.frame];
     imageView.hidden = YES;
+    
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
+    
     stillImageView = imageView;
+    
     return stillImageView;
 }
 

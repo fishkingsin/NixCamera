@@ -38,7 +38,7 @@
 #pragma mark -- CameraControllerDelegate
 
 - (void)cameraViewControllerDidDismissed:(UIViewController *)controller {
-    
+    [controller dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)cameraViewControllerDidSelectedAlnbum:(UIViewController *)controller {
