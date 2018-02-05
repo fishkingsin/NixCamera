@@ -4,6 +4,7 @@ target 'NixCamera_Example' do
   pod 'NixCamera', :path => '../'
   pod 'CircleProgressView'
   pod 'Masonry'
+  pod 'RFRotate'
   target 'NixCamera_Tests' do
     inherit! :search_paths
 
