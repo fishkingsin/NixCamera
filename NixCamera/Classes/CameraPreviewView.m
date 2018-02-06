@@ -10,6 +10,7 @@
 #import "UIImage+Resources.h"
 #import <Masonry/Masonry.h>
 #import "UIImage+Configure.h"
+#import "ViewUtils.h"
 #define BUNDLE [NSBundle bundleForClass:[self class]]
 @interface CameraPreviewView ()<CameraPreviewViewProtocol>
 @property (strong, nonatomic) UIButton *confirmButton;
@@ -194,14 +195,14 @@
 - (UIButton *)backButton {
     if(_backButton) return _backButton;
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(0, 0, 32, 32);
+    button.frame = CGRectMake(0, 0, 64, 64);
     [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/camera_preview_back" ofType:@"png" inBundle:BUNDLE]   forState:UIControlStateNormal];
     [button addTarget:self action:@selector(onBackToCamera) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:button];
     UIEdgeInsets padding = UIEdgeInsetsMake(0, 10, 50, 0);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.width.mas_equalTo(65);
-        make.height.mas_equalTo(65);
+        make.width.mas_equalTo(64);
+        make.height.mas_equalTo(64);
         make.centerX.equalTo(self.mas_centerX).with.offset(padding.left);
         make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
         
@@ -213,14 +214,14 @@
 - (UIButton *)confirmButton {
     if(_confirmButton) return _confirmButton;
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(0, 0, 32, 32);
+    button.frame = CGRectMake(0, 0, 64, 64);
     [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/camera_preview_finished" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
     [button addTarget:self action:@selector(onConfirmContent) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:button];
     UIEdgeInsets padding = UIEdgeInsetsMake(10, 0, 50, 0);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.width.mas_equalTo(65);
-        make.height.mas_equalTo(65);
+        make.width.mas_equalTo(64);
+        make.height.mas_equalTo(64);
         make.centerX.equalTo(self.mas_centerX).with.offset(-padding.right);
         make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
         
@@ -258,9 +259,15 @@
 -(void) launchPreview {
     self.backButton.alpha = 0.0f;
     self.confirmButton.alpha = 0.0f;
+    self.backButton.center = self.center;
+    self.confirmButton.center = self.center;
+    
+    self.confirmButton.bottom = self.frame.size.height - 50;
+    self.backButton.bottom = self.frame.size.height - 50;
+    
     [UIView animateWithDuration:0.5 delay:0.1 options:0 animations: ^{
-        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, -65, 0 );
-        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, 65, 0 );
+        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, 44, 0 );
+        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, -44, 0 );
         self.backButton.alpha = 1.0f;
         self.confirmButton.alpha = 1.0f;
     } completion: ^(BOOL completed) {
@@ -271,8 +278,8 @@
 }
 -(void) closePreview:(void (^ __nullable)(BOOL finished))complete{
     [UIView animateWithDuration:0.5 delay:0 options:0 animations: ^{
-        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, 65, 0 );
-        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, -65, 0 );
+        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, -44, 0 );
+        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, 44, 0 );
         self.backButton.alpha = 0.0f;
         self.confirmButton.alpha = 0.0f;
     } completion:complete];

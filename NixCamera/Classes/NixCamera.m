@@ -439,19 +439,16 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
     CMTime minDuration = CMTimeMakeWithSeconds(1, recordDuration.timescale);
     [self removeObserver:self
               forKeyPath:@"movieFileOutput.recording"];
+    self.recording = NO;
+    [self enableTorch:NO];
     if (CMTimeCompare(recordDuration, minDuration) > 0){
-        
-        
-        self.recording = NO;
-        [self enableTorch:NO];
-        
-        
         
         if(self.didRecordCompletionBlock) {
             self.didRecordCompletionBlock(self, outputFileURL, error, nil);
         }
         
     }else{
+        [self stopRecording];
         AVURLAsset *asset=[[AVURLAsset alloc] initWithURL:outputFileURL options:nil];
         AVAssetImageGenerator *generator = [[AVAssetImageGenerator alloc] initWithAsset:asset];
         generator.appliesPreferredTrackTransform=TRUE;
@@ -462,15 +459,16 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
             if (result != AVAssetImageGeneratorSucceeded) {
                 NSLog(@"couldn't generate thumbnail, error:%@", error);
                 self.didRecordCompletionBlock(self, nil, error , nil);
-            }
-            UIImage *image = [UIImage imageWithCGImage:im];
-            if(self.didRecordCompletionBlock) {
-                NSError *error = [NSError errorWithDomain:NixCameraErrorDomain
-                                                     code:NixCameraErrorCodeVideoTooShort
-                                                 userInfo:nil];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.didRecordCompletionBlock(self, nil, error , image);
-                });
+            }else{
+                UIImage *image = [UIImage imageWithCGImage:im];
+                if(self.didRecordCompletionBlock) {
+                    NSError *error = [NSError errorWithDomain:NixCameraErrorDomain
+                                                         code:NixCameraErrorCodeVideoTooShort
+                                                     userInfo:nil];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.didRecordCompletionBlock(self, nil, error , image);
+                    });
+                }
             }
         };
         
