@@ -23,6 +23,7 @@
 @property (strong, nonatomic) NixCamera *camera;
 @property (strong, nonatomic) UILabel *errorLabel;
 @property (strong, nonatomic) UILabel *hintsLabel;
+@property (strong, nonatomic) UILabel *remainTimeLabel;
 @property (strong, nonatomic) CircleButtonView *snapButton;
 @property (strong, nonatomic) UIButton *switchButton;
 @property (strong, nonatomic) UIButton *flashButton;
@@ -106,7 +107,10 @@
         }
     }];
     [self.camera setOnRecordingTime:^(double recordedTime, double maxTime) {
-        
+        NSAttributedString* attributedText = [weakSelf timeFormatAttributeString:recordedTime];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weakSelf.remainTimeLabel setAttributedText:attributedText];
+        });
     }];
     
     
@@ -130,7 +134,8 @@
     }
     
     
-    
+    [self.view addSubview:self.remainTimeLabel];
+    self.remainTimeLabel.hidden = YES;
     [self.view addSubview:self.hintsLabel];
     UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 10, 10);
     [self.hintsLabel mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -145,6 +150,17 @@
         
         //make.centerX.equalTo(self.view.mas_centerX);
         make.bottom.equalTo(self.view.mas_bottom).with.offset(-15);
+    }];
+    
+    [self.remainTimeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        
+        
+        
+        make.height.mas_equalTo(15);
+        
+        make.centerX.equalTo(self.view.mas_centerX);
+        make.top.equalTo(self.view.mas_top).with.offset(15);
     }];
 
     
@@ -394,6 +410,12 @@
 
 - (void)buttonView:(UIView *)button didLongTapBegan:(UITapGestureRecognizer *)tapGes {
     // start recording
+    
+    
+
+    self.remainTimeLabel.attributedText = [self timeFormatAttributeString:0];
+    self.remainTimeLabel.hidden = NO;
+    
     NSURL *outputURL = [[[self applicationDocumentsDirectory]
                          URLByAppendingPathComponent:[self timeStamp]] URLByAppendingPathExtension:@"mov"];
     __weak typeof(self) weakSelf = self;
@@ -402,28 +424,33 @@
     weakSelf.hintsLabel.hidden = YES;
     
     [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image) {
-        
-        weakSelf.flashButton.hidden = NO;
-        weakSelf.switchButton.hidden = NO;
-        weakSelf.hintsLabel.hidden = NO;
-        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            weakSelf.flashButton.hidden = NO;
+            weakSelf.switchButton.hidden = NO;
+            weakSelf.hintsLabel.hidden = NO;
+            weakSelf.remainTimeLabel.hidden = YES;
+        });
         if(!error) {
             if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
                 
                 return;
             }
             [weakSelf.previewView showMediaContentVideo:outputURL withType:Enum_VideoURLPath];
-            weakSelf.previewView.hidden = NO;
-            [weakSelf.previewView launchPreview];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                weakSelf.previewView.hidden = NO;
+                [weakSelf.previewView launchPreview];
+            });
         }else if(image){
             NSLog(@"An error has occured: %@", error);
             if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
                 
                 return;
             }
-            [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
-            weakSelf.previewView.hidden = NO;
-            [weakSelf.previewView launchPreview];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
+                weakSelf.previewView.hidden = NO;
+                [weakSelf.previewView launchPreview];
+            });
         }else{
             NSLog(@"An error has occured: %@", error);
         }
@@ -440,6 +467,50 @@
     [self.camera stopRecording];
     
 }
+
+-(NSString *)timeFormatConvertToSeconds:(double )totalSeconds
+{
+    
+    
+    int seconds = (int)round( ((int)round(totalSeconds)) % 60);
+    int minutes = (int)round((int)(totalSeconds / 60.0f) % 60);
+    int hours = (int)round(totalSeconds / 3600);
+    
+    return [NSString stringWithFormat:@"%02d:%02d:%02d",hours, minutes, seconds];
+}
+
+-(NSAttributedString *)timeFormatAttributeString:(double )totalSeconds
+{
+    NSMutableParagraphStyle *style =  [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+    style.alignment = NSTextAlignmentJustified;
+    style.firstLineHeadIndent = 10.0f;
+    style.headIndent = 10.0f;
+    style.tailIndent = -10.0f;
+    return [[NSAttributedString alloc] initWithString:[self timeFormatConvertToSeconds:totalSeconds] attributes:@{ NSParagraphStyleAttributeName : style}];
+}
+
+- (UILabel *) remainTimeLabel{
+    if(_remainTimeLabel) return _remainTimeLabel;
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.text = [self timeFormatConvertToSeconds:0];
+    
+    label.numberOfLines = 2;
+    label.lineBreakMode = NSLineBreakByWordWrapping;
+    [label.layer setBackgroundColor:[[UIColor colorWithWhite:0 alpha:0.3] CGColor]];
+    
+    [label.layer setMasksToBounds:YES];
+    
+    //The rounded corner part, where you specify your view's corner radius:
+    label.layer.cornerRadius = 8;
+    label.clipsToBounds = YES;
+    
+    label.font = [UIFont systemFontOfSize:13.0f];
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    _remainTimeLabel = label;
+    return _remainTimeLabel;
+}
 - (UILabel *) hintsLabel{
     if(_hintsLabel) return _hintsLabel;
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -454,7 +525,7 @@
     [label.layer setMasksToBounds:YES];
     
     //The rounded corner part, where you specify your view's corner radius:
-    label.layer.cornerRadius = 5;
+    label.layer.cornerRadius = 8;
     label.clipsToBounds = YES;
     
     label.font = [UIFont systemFontOfSize:13.0f];
@@ -498,7 +569,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.previewView clearContent:YES];
         self.previewView.hidden = YES;
-        self.flashButton.hidden = NO;
+        if(self.camera.isFlashAvailable){
+            self.flashButton.hidden = NO;
+        }
         self.switchButton.hidden = NO;
         self.hintsLabel.hidden = NO;
     });
@@ -518,7 +591,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.previewView clearContent:YES];
         self.previewView.hidden = YES;
-        self.flashButton.hidden = NO;
+        if(self.camera.isFlashAvailable){
+            self.flashButton.hidden = NO;
+        }
         self.switchButton.hidden = NO;
         self.hintsLabel.hidden = NO;
     });
@@ -532,7 +607,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.previewView clearContent:YES];
         self.previewView.hidden = YES;
-        self.flashButton.hidden = NO;
+        if(self.camera.isFlashAvailable){
+            self.flashButton.hidden = NO;
+        }
         self.switchButton.hidden = NO;
         self.hintsLabel.hidden = NO;
     });
