@@ -437,14 +437,15 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
 {
     CMTime recordDuration = captureOutput.recordedDuration;
     CMTime minDuration = CMTimeMakeWithSeconds(1, recordDuration.timescale);
+    [self removeObserver:self
+              forKeyPath:@"movieFileOutput.recording"];
     if (CMTimeCompare(recordDuration, minDuration) > 0){
         
         
         self.recording = NO;
         [self enableTorch:NO];
         
-        [self removeObserver:self
-                  forKeyPath:@"movieFileOutput.recording"];
+        
         
         if(self.didRecordCompletionBlock) {
             self.didRecordCompletionBlock(self, outputFileURL, error, nil);
