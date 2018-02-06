@@ -17,6 +17,7 @@
 #import "CameraPreviewViewProtocol.h"
 #import "CameraPreviewView.h"
 #import <Masonry/Masonry.h>
+#import <RFRotate/RFRotate.h>
 #define BUNDLE [NSBundle bundleForClass:[self class]]
 @interface NixCameraViewController ()
 @property (strong, nonatomic) NixCamera *camera;
@@ -30,11 +31,12 @@
 @end
 
 @implementation NixCameraViewController{
-    
+    float currentRotation;
 }
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    currentRotation = 0;
     self.view.backgroundColor = [UIColor blackColor];
     [self.navigationController setNavigationBarHidden:YES animated:NO];
     
@@ -88,11 +90,12 @@
                 }
                 
                 UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-                label.text = @"We need permission for the camera.\nPlease go to your settings.";
+                
+                label.text = NSLocalizedStringFromTableInBundle(@"Access to the camera has been prohibited; please enable it in the Settings app to continue.", @"NixCamera", [NSBundle bundleForClass:[weakSelf class]], @"Access to the camera has been prohibited; please enable it in the Settings app to continue.");
                 label.numberOfLines = 2;
                 label.lineBreakMode = NSLineBreakByWordWrapping;
                 label.backgroundColor = [UIColor clearColor];
-                label.font = [UIFont fontWithName:@"AvenirNext-DemiBold" size:13.0f];
+                label.font = [UIFont systemFontOfSize:13.0f];
                 label.textColor = [UIColor whiteColor];
                 label.textAlignment = NSTextAlignmentCenter;
                 [label sizeToFit];
@@ -126,41 +129,45 @@
         [self.view addSubview:self.switchButton];
     }
     
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-    label = [[UILabel alloc] initWithFrame:CGRectZero];
-    label.text = @"Hold for video (15 seconds max.), tap for photo";
-    label.numberOfLines = 2;
-    label.lineBreakMode = NSLineBreakByWordWrapping;
-    label.backgroundColor = [UIColor colorWithWhite:0 alpha:0.5];
-    label.layer.cornerRadius = 10.0f;
-    label.font = [UIFont systemFontOfSize:13.0f];
-    label.textColor = [UIColor whiteColor];
-    label.textAlignment = NSTextAlignmentCenter;
-    [label sizeToFit];
-    label.center = CGPointMake(screenRect.size.width / 2.0f, screenRect.size.height / 2.0f);
-    label.bottom = self.view.height - 15.0f;
-    self.hintsLabel = label;
+    
+    
     [self.view addSubview:self.hintsLabel];
+    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 10, 10);
+    [self.hintsLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        
+        
+        make.left.equalTo(self.view.mas_left).with.offset(padding.left);
+        
+        make.right.equalTo(self.view.mas_right).with.offset(-padding.right);
+        
+        make.height.mas_equalTo(15);
+        
+        //make.centerX.equalTo(self.view.mas_centerX);
+        make.bottom.equalTo(self.view.mas_bottom).with.offset(-15);
+    }];
+
+    
     
     [self.view addSubview:self.cancelButton];
     self.cancelButton.frame = CGRectMake(0, 0, 44, 44);
     [self onOrientationChange];
     
-//    [self.snapButton mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.centerX.equalTo(self.view.mas_centerX);
-//        make.bottom.equalTo(self.view.mas_bottom).with.offset(-50);
-//    }];
-//
-//    [self.flashButton mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.left.equalTo(self.view.mas_left).with.offset(15);
-//        make.centerY.equalTo(self.snapButton.mas_centerY).with.offset(-15);
-//    }];
-//
-//    [self.switchButton mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.right.equalTo(self.view.mas_right).with.offset(-15);
-//        make.centerY.equalTo(self.snapButton.mas_centerY).with.offset(-15);
-//    }];
-
+    //    [self.snapButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    //        make.centerX.equalTo(self.view.mas_centerX);
+    //        make.bottom.equalTo(self.view.mas_bottom).with.offset(-50);
+    //    }];
+    //
+    //    [self.flashButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    //        make.left.equalTo(self.view.mas_left).with.offset(15);
+    //        make.centerY.equalTo(self.snapButton.mas_centerY).with.offset(-15);
+    //    }];
+    //
+    //    [self.switchButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    //        make.right.equalTo(self.view.mas_right).with.offset(-15);
+    //        make.centerY.equalTo(self.snapButton.mas_centerY).with.offset(-15);
+    //    }];
+    
     
     
     [self.view addSubview:self.previewView];
@@ -182,7 +189,7 @@
 }
 
 -(void)viewDidAppear:(BOOL)animated{
- 
+    
 }
 
 /* other lifecycle methods */
@@ -204,7 +211,7 @@
     self.flashButton.y = self.snapButton.y - 15.0f;
     self.switchButton.y = self.snapButton.y - 15.0f;
     self.switchButton.right = self.view.width - 5.0f;
-
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -221,52 +228,61 @@
 
 - (void)deviceDidRotate:(NSNotification *)notification
 {
+    
     UIDeviceOrientation currentDeviceOrientation = [[UIDevice currentDevice] orientation];
-    if (currentDeviceOrientation==UIInterfaceOrientationPortrait) {
-
-    } else if (currentDeviceOrientation==UIInterfaceOrientationLandscapeLeft) {
-
-    } else if (currentDeviceOrientation==UIInterfaceOrientationLandscapeRight) {
-
+    float targetRotation = 0 ;
+    if (currentDeviceOrientation==UIDeviceOrientationPortrait){
+        targetRotation = 0;
+        
+    } else if (currentDeviceOrientation==UIDeviceOrientationLandscapeLeft ) {
+        targetRotation = -90;
+        
+    } else if (currentDeviceOrientation==UIDeviceOrientationLandscapeRight) {
+        
+        targetRotation = 90;
     }
-
+    
+    [RFRotate rotate:self.snapButton withDuration:0.5f andDegrees:currentRotation - targetRotation];
+    [RFRotate rotate:self.switchButton withDuration:0.5f andDegrees:currentRotation - targetRotation];
+    [RFRotate rotate:self.flashButton withDuration:0.5f andDegrees:currentRotation - targetRotation];
+    currentRotation = targetRotation;
 }
 
 -(void) onOrientationChange {
-//    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
+    //    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
     
-//    if(currentOrientation == UIDeviceOrientationPortrait || currentOrientation == UIDeviceOrientationFaceUp){
-//        self.snapButton.center = self.view.contentCenter;
-//        self.snapButton.bottom = self.view.bottom - 50.0f;
-//        self.flashButton.left = 5.0f;
-//        self.flashButton.y = self.snapButton.y - 15.0f;
-//        self.switchButton.y = self.snapButton.y - 15.0f;
-//        self.switchButton.right = self.view.width - 5.0f;
-//
-//    }else if(currentOrientation == UIDeviceOrientationLandscapeLeft){
-//
-//        self.snapButton.center = self.view.contentCenter;
-//        self.snapButton.right = self.view.right - 50.0f;
-//
-//        self.flashButton.x = self.snapButton.x - 5.0f;
-//        self.flashButton.bottom = self.view.bottom - 15.0f;
-//
-//        self.switchButton.top = self.view.top + 15.0f;
-//        self.switchButton.x = self.snapButton.x - 5.0f;
-//
-//    }else if(currentOrientation == UIDeviceOrientationLandscapeRight){
-//
-//        self.snapButton.center = self.view.contentCenter;
-//
-//        self.snapButton.left = self.view.left + 50.0f;
-//
-//        self.flashButton.x = self.snapButton.x - 5.0f;
-//        self.flashButton.top = self.view.top + 15.0f;
-//
-//        self.switchButton.bottom = self.view.bottom - 15.0f;
-//        self.switchButton.x = self.snapButton.x - 5.0f;
-//
-//    }
+    //    if(currentOrientation == UIDeviceOrientationPortrait || currentOrientation == UIDeviceOrientationFaceUp){
+    //        self.snapButton.center = self.view.contentCenter;
+    //        self.snapButton.bottom = self.view.bottom - 50.0f;
+    //        self.flashButton.left = 5.0f;
+    //        self.flashButton.y = self.snapButton.y - 15.0f;
+    //        self.switchButton.y = self.snapButton.y - 15.0f;
+    //        self.switchButton.right = self.view.width - 5.0f;
+    //
+    //    }else if(currentOrientation == UIDeviceOrientationLandscapeLeft){
+    //
+    //        self.snapButton.center = self.view.contentCenter;
+    //        self.snapButton.right = self.view.right - 50.0f;
+    //
+    //        self.flashButton.x = self.snapButton.x - 5.0f;
+    //        self.flashButton.bottom = self.view.bottom - 15.0f;
+    //
+    //        self.switchButton.top = self.view.top + 15.0f;
+    //        self.switchButton.x = self.snapButton.x - 5.0f;
+    //
+    //    }else if(currentOrientation == UIDeviceOrientationLandscapeRight){
+    //
+    //        self.snapButton.center = self.view.contentCenter;
+    //
+    //        self.snapButton.left = self.view.left + 50.0f;
+    //
+    //        self.flashButton.x = self.snapButton.x - 5.0f;
+    //        self.flashButton.top = self.view.top + 15.0f;
+    //
+    //        self.switchButton.bottom = self.view.bottom - 15.0f;
+    //        self.switchButton.x = self.snapButton.x - 5.0f;
+    //
+    //    }
 }
 
 /* camera button methods */
@@ -368,6 +384,7 @@
             }
             [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
             weakSelf.previewView.hidden = NO;
+            [weakSelf.previewView launchPreview];
         }
         else {
             NSLog(@"An error has occured: %@", error);
@@ -397,6 +414,7 @@
             }
             [weakSelf.previewView showMediaContentVideo:outputURL withType:Enum_VideoURLPath];
             weakSelf.previewView.hidden = NO;
+            [weakSelf.previewView launchPreview];
         }else if(image){
             NSLog(@"An error has occured: %@", error);
             if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
@@ -405,6 +423,7 @@
             }
             [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
             weakSelf.previewView.hidden = NO;
+            [weakSelf.previewView launchPreview];
         }else{
             NSLog(@"An error has occured: %@", error);
         }
@@ -421,19 +440,40 @@
     [self.camera stopRecording];
     
 }
-
+- (UILabel *) hintsLabel{
+    if(_hintsLabel) return _hintsLabel;
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label = [[UILabel alloc] initWithFrame:CGRectZero];
+    
+    
+    label.text = [NSString stringWithFormat: NSLocalizedStringFromTableInBundle(@"Hold for video (%d seconds max.), tap for photo", @"NixCamera", BUNDLE, @"Hold for video (n seconds max.), tap for photo"), self.camera.maximumVideoDuration];
+    label.numberOfLines = 2;
+    label.lineBreakMode = NSLineBreakByWordWrapping;
+    [label.layer setBackgroundColor:[[UIColor colorWithWhite:0 alpha:0.3] CGColor]];
+    
+    [label.layer setMasksToBounds:YES];
+    
+    //The rounded corner part, where you specify your view's corner radius:
+    label.layer.cornerRadius = 5;
+    label.clipsToBounds = YES;
+    
+    label.font = [UIFont systemFontOfSize:13.0f];
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    _hintsLabel = label;
+    return _hintsLabel;
+}
 - (UIButton *)cancelButton {
     if(!_cancelButton) {
-        UIImage *cancelImage = [UIImage imageForResourcePath:@"NixCamera.bundle/cancel" ofType:@"png" inBundle:BUNDLE];
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-        button.tintColor = [UIColor whiteColor];
+        UIImage *cancelImage = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_cancel" ofType:@"png" inBundle:BUNDLE];
+        UIButton *button = [[UIButton alloc]initWithFrame:CGRectZero];
         [button setImage:cancelImage forState:UIControlStateNormal];
         button.imageView.clipsToBounds = NO;
         button.contentEdgeInsets = UIEdgeInsetsMake(10, 10, 10, 10);
-        button.layer.shadowColor = [UIColor blackColor].CGColor;
-        button.layer.shadowOffset = CGSizeMake(0.0f, 0.0f);
-        button.layer.shadowOpacity = 0.4f;
-        button.layer.shadowRadius = 1.0f;
+//        button.layer.shadowColor = [UIColor blackColor].CGColor;
+//        button.layer.shadowOffset = CGSizeMake(0.0f, 0.0f);
+//        button.layer.shadowOpacity = 0.4f;
+//        button.layer.shadowRadius = 1.0f;
         button.clipsToBounds = NO;
         [button addTarget:self action:@selector(cancelButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         _cancelButton = button;
@@ -450,12 +490,18 @@
     return _previewView;
 }
 
+
 #pragma mark -- RunsCameraPreviewViewDelegate
 
 - (void)previewDidCancel:(UIView *)preview {
     NSLog(@"preview return continue photo taking");
-    [self.previewView clearContent:YES];
-    self.previewView.hidden = YES;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.previewView clearContent:YES];
+        self.previewView.hidden = YES;
+        self.flashButton.hidden = NO;
+        self.switchButton.hidden = NO;
+        self.hintsLabel.hidden = NO;
+    });
     if (![self.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
         NSLog(@" %@ Not implementation RunsCameraPreviewViewProtocol", self.previewView);
         return;
@@ -469,8 +515,13 @@
     if (_delegate && [_delegate respondsToSelector:@selector(cameraViewController:captureStillImage:)]) {
         [_delegate cameraViewController:self captureStillImage:image];
     }
-    [self.previewView clearContent:YES];
-    self.previewView.hidden = YES;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.previewView clearContent:YES];
+        self.previewView.hidden = YES;
+        self.flashButton.hidden = NO;
+        self.switchButton.hidden = NO;
+        self.hintsLabel.hidden = NO;
+    });
 }
 
 - (void)preview:(UIView *)preview captureVideoAsset:(VideoAsset *)asset {
@@ -478,8 +529,13 @@
     if (_delegate && [_delegate respondsToSelector:@selector(cameraViewController:captureVideoAsset:)]) {
         [_delegate cameraViewController:self captureVideoAsset:asset];
     }
-    [self.previewView clearContent:YES];
-    self.previewView.hidden = YES;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.previewView clearContent:YES];
+        self.previewView.hidden = YES;
+        self.flashButton.hidden = NO;
+        self.switchButton.hidden = NO;
+        self.hintsLabel.hidden = NO;
+    });
 }
 
 @end

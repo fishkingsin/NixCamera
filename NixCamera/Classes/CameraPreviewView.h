@@ -9,6 +9,7 @@
 #import "CameraPreviewViewDelegate.h"
 @interface CameraPreviewView : UIView
 @property (nonatomic, weak) id<CameraPreviewViewDelegate> delegate;
+-(void) launchPreview;
 @end
 @interface VideoAsset : NSObject
 @property (nonatomic, readonly) NSURL *videoURL;

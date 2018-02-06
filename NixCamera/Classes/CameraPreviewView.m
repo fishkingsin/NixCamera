@@ -12,7 +12,9 @@
 #import "UIImage+Configure.h"
 #define BUNDLE [NSBundle bundleForClass:[self class]]
 @interface CameraPreviewView ()<CameraPreviewViewProtocol>
-
+@property (strong, nonatomic) UIButton *confirmButton;
+@property (strong, nonatomic) UIButton *backButton;
+@property (strong, nonatomic) UIButton *playButton;
 @end
 @implementation CameraPreviewView {
     MediaContentType contentType;
@@ -25,6 +27,7 @@
 
 - (void)dealloc {
     NSLog(@"CameraPreviewView Release");
+    [NSNotificationCenter.defaultCenter removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -40,6 +43,8 @@
         }];
         [self addSubview:self.backButton];
         [self addSubview:self.confirmButton];
+        [self addSubview:self.playButton];
+        
         
         
     }
@@ -53,6 +58,7 @@
         player.externalPlaybackVideoGravity = AVLayerVideoGravityResizeAspectFill;
         [self.layer addSublayer:playerLayer];
         [self.layer insertSublayer:playerLayer atIndex:0];
+        
     }
     
 }
@@ -64,6 +70,8 @@
     self.stillImageView.hidden = NO;
     playerLayer.hidden = YES;
     [self.stillImageView setImage:image];
+    
+    self.playButton.hidden = YES;
 }
 
 - (void)showMediaContentVideo:(NSURL *)URLPath withType:(MediaContentType)type {
@@ -77,19 +85,37 @@
     player.externalPlaybackVideoGravity = AVLayerVideoGravityResizeAspectFill;
     [self.layer addSublayer:playerLayer];
     [self.layer insertSublayer:playerLayer atIndex:0];
+    
     //
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(onPlaybackFinished) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     //
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [player play];
-    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [player play];
+//    });
     
     NSLog(@"previewvideo outputURL: %@",URLPath);
+    
+    UITapGestureRecognizer *singleFingerTap =
+    [[UITapGestureRecognizer alloc] initWithTarget:self
+                                            action:@selector(handleSingleTap:)];
+    [self addGestureRecognizer:singleFingerTap];
+    self.playButton.hidden = NO;
+    
 }
-
+//The event handling method
+- (void)handleSingleTap:(UITapGestureRecognizer *)recognizer
+{
+    if ((player.rate != 0) && (player.error == nil)) {
+        [player pause];
+        self.playButton.hidden = NO;
+    }
+    
+    //Do stuff here...
+}
 - (void)onPlaybackFinished {
     [player seekToTime:CMTimeMake(0, 1)];
-    [player play];
+//    [player play];
+    self.playButton.hidden = NO;
 }
 
 - (void)clearContent:(BOOL)needClear {
@@ -107,41 +133,50 @@
 }
 
 - (void)onBackToCamera {
-    if (_delegate && [_delegate respondsToSelector:@selector(previewDidCancel:)]) {
-        [_delegate previewDidCancel:self];
-        [self clearContent:YES];
-    }
+    [self closePreview:^(BOOL finished) {
+        if(finished){
+            if (_delegate && [_delegate respondsToSelector:@selector(previewDidCancel:)]) {
+                [_delegate previewDidCancel:self];
+                [self clearContent:YES];
+            }
+        }
+    }];
 }
 
 - (void)onConfirmContent {
-    if (!_delegate) {
-        NSLog(@"delegate empty， can not can not reuturn select photo or video");;
-        return;
-    }
-    if (Enum_StillImage == contentType && stillImageView.image) {
-        if (![_delegate respondsToSelector:@selector(preview:captureStillImage:)]) {
-            NSLog(@"delegate is not response to selector preview:captureStillImage:");
-            return;
+    [self closePreview:^(BOOL finished) {
+        if(finished){
+            if (!_delegate) {
+                NSLog(@"delegate empty， can not can not reuturn select photo or video");;
+                return;
+            }
+            if (Enum_StillImage == contentType && stillImageView.image) {
+                if (![_delegate respondsToSelector:@selector(preview:captureStillImage:)]) {
+                    NSLog(@"delegate is not response to selector preview:captureStillImage:");
+                    return;
+                }
+                [_delegate preview:self captureStillImage:stillImageView.image];
+                [self clearContent:YES];
+                return;
+            }
+            
+            if (Enum_VideoURLPath == contentType && videoURLPath) {
+                if (![_delegate respondsToSelector:@selector(preview:captureVideoAsset:)]) {
+                    NSLog(@"delegate is not response to selector preview:captureVideoURL:");
+                    return;
+                }
+                UIImage *frame = [UIImage fetchVideoPreViewImageWithUrl:videoURLPath];
+                
+                NSTimeInterval duration = player.currentItem.duration.value / player.currentItem.duration.timescale;
+                AVAsset *asset = player.currentItem.asset;
+                VideoAsset *videoAsset = [[VideoAsset alloc] initWithData:videoURLPath preview:frame duration:duration asset:asset];
+                [_delegate preview:self captureVideoAsset:videoAsset];
+                [self clearContent:YES];
+                
+            }
         }
-        [_delegate preview:self captureStillImage:stillImageView.image];
-        [self clearContent:YES];
-        return;
-    }
+    }];
     
-    if (Enum_VideoURLPath == contentType && videoURLPath) {
-        if (![_delegate respondsToSelector:@selector(preview:captureVideoAsset:)]) {
-            NSLog(@"delegate is not response to selector preview:captureVideoURL:");
-            return;
-        }
-        UIImage *frame = [UIImage fetchVideoPreViewImageWithUrl:videoURLPath];
-        
-        NSTimeInterval duration = player.currentItem.duration.value / player.currentItem.duration.timescale;
-        AVAsset *asset = player.currentItem.asset;
-        VideoAsset *videoAsset = [[VideoAsset alloc] initWithData:videoURLPath preview:frame duration:duration asset:asset];
-        [_delegate preview:self captureVideoAsset:videoAsset];
-        [self clearContent:YES];
-        
-    }
 }
 
 - (UIImageView *)stillImageView {
@@ -157,38 +192,90 @@
 }
 
 - (UIButton *)backButton {
+    if(_backButton) return _backButton;
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(0, 0, 32, 32);
     [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/camera_preview_back" ofType:@"png" inBundle:BUNDLE]   forState:UIControlStateNormal];
     [button addTarget:self action:@selector(onBackToCamera) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:button];
-    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 50, 10);
+    UIEdgeInsets padding = UIEdgeInsetsMake(0, 10, 50, 0);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
         make.width.mas_equalTo(65);
         make.height.mas_equalTo(65);
-        make.right.equalTo(self.mas_centerX).with.offset(-padding.right);
+        make.centerX.equalTo(self.mas_centerX).with.offset(padding.left);
         make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
         
     }];
-    return button;
+    _backButton = button;
+    return _backButton;
 }
 
 - (UIButton *)confirmButton {
+    if(_confirmButton) return _confirmButton;
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(0, 0, 32, 32);
     [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/camera_preview_finished" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
     [button addTarget:self action:@selector(onConfirmContent) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:button];
-    UIEdgeInsets padding = UIEdgeInsetsMake(10, 10, 50, 10);
-    
+    UIEdgeInsets padding = UIEdgeInsetsMake(10, 0, 50, 0);
     [button mas_makeConstraints:^(MASConstraintMaker *make) {
         make.width.mas_equalTo(65);
         make.height.mas_equalTo(65);
-        make.left.equalTo(self.mas_centerX).with.offset(padding.left);
+        make.centerX.equalTo(self.mas_centerX).with.offset(-padding.right);
         make.bottom.equalTo(self.mas_bottom).with.offset(-padding.bottom);
         
     }];
-    return button;
+    _confirmButton = button;
+    return _confirmButton;
+}
+
+-(UIButton *) playButton{
+    if(_playButton) return _playButton;
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(0, 0, 32, 32);
+    [button setImage: [UIImage imageForResourcePath:@"NixCamera.bundle/playButton" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(onPlayVideo) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:button];
+    [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(65);
+        make.height.mas_equalTo(65);
+        make.centerX.equalTo(self.mas_centerX);
+        make.centerY.equalTo(self.mas_centerY);
+        
+    }];
+    _playButton = button;
+    return _playButton;
+    
+}
+
+-(void) onPlayVideo{
+    if(player){
+        [player play];
+        self.playButton.hidden = YES;
+    }
+}
+
+-(void) launchPreview {
+    self.backButton.alpha = 0.0f;
+    self.confirmButton.alpha = 0.0f;
+    [UIView animateWithDuration:0.5 delay:0.1 options:0 animations: ^{
+        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, -65, 0 );
+        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, 65, 0 );
+        self.backButton.alpha = 1.0f;
+        self.confirmButton.alpha = 1.0f;
+    } completion: ^(BOOL completed) {
+        if (!completed) {
+            
+        }
+    }];
+}
+-(void) closePreview:(void (^ __nullable)(BOOL finished))complete{
+    [UIView animateWithDuration:0.5 delay:0 options:0 animations: ^{
+        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, 65, 0 );
+        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, -65, 0 );
+        self.backButton.alpha = 0.0f;
+        self.confirmButton.alpha = 0.0f;
+    } completion:complete];
 }
 @end
 
