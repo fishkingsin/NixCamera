@@ -264,10 +264,15 @@
     
     self.confirmButton.bottom = self.frame.size.height - 50;
     self.backButton.bottom = self.frame.size.height - 50;
+    self.backButton.transform = CGAffineTransformMake(1,0,0,1,0,0);
+    self.confirmButton.transform = CGAffineTransformMake(1,0,0,1,0,0);
+    
+    CGAffineTransform transform1 = CGAffineTransformMake(1, 0, 0, 1, 44, 0);
+    CGAffineTransform transform2 = CGAffineTransformMake(1, 0, 0, 1, -44, 0);
     
     [UIView animateWithDuration:0.5 delay:0.1 options:0 animations: ^{
-        self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, 44, 0 );
-        self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, -44, 0 );
+        self.backButton.transform = transform1;
+        self.confirmButton.transform = transform2;
         self.backButton.alpha = 1.0f;
         self.confirmButton.alpha = 1.0f;
     } completion: ^(BOOL completed) {
@@ -278,6 +283,7 @@
 }
 -(void) closePreview:(void (^ __nullable)(BOOL finished))complete{
     [UIView animateWithDuration:0.5 delay:0 options:0 animations: ^{
+        
         self.backButton.transform = CGAffineTransformTranslate(self.backButton.transform, -44, 0 );
         self.confirmButton.transform = CGAffineTransformTranslate(self.confirmButton.transform, 44, 0 );
         self.backButton.alpha = 0.0f;

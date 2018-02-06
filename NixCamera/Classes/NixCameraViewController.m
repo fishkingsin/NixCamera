@@ -151,11 +151,14 @@
         //make.centerX.equalTo(self.view.mas_centerX);
         make.bottom.equalTo(self.view.mas_bottom).with.offset(-15);
     }];
-    
+    self.remainTimeLabel.text = @"00:00:00";
+    [self.remainTimeLabel sizeToFit];
+    [self.remainTimeLabel setNeedsFocusUpdate];
+    float miniWidth = self.remainTimeLabel.frame.size.width;
     [self.remainTimeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         
-        make.height.mas_equalTo(30);
-        make.width.mas_greaterThanOrEqualTo(self.view.width*0.3);
+        make.height.mas_equalTo(20);
+        make.width.mas_greaterThanOrEqualTo(miniWidth+25);
         make.centerX.equalTo(self.view.mas_centerX);
         make.top.equalTo(self.view.mas_top).with.offset(15);
     }];
@@ -172,11 +175,21 @@
     
     [circleView mas_makeConstraints:^(MASConstraintMaker *make) {
         
-        
+        make.width.mas_greaterThanOrEqualTo(12);
+        make.height.mas_greaterThanOrEqualTo(12);
         make.centerY.equalTo(self.remainTimeLabel.mas_centerY);
         make.left.equalTo(self.remainTimeLabel.mas_left).with.offset(5);
     }];
     
+    circleView.alpha = 1.0f;
+    [UIView animateKeyframesWithDuration:2.0 delay:0.0 options:UIViewKeyframeAnimationOptionAutoreverse | UIViewKeyframeAnimationOptionRepeat animations:^{
+        [UIView addKeyframeWithRelativeStartTime:0.0 relativeDuration:0.5 animations:^{
+            circleView.alpha = 0.0f;
+        }];
+        [UIView addKeyframeWithRelativeStartTime:0.5 relativeDuration:0.5 animations:^{
+            circleView.alpha = 1.0f;
+        }];
+    } completion:nil];
     
     [self.view addSubview:self.cancelButton];
     [self onOrientationChange];
@@ -210,6 +223,7 @@
     //    self.switchButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
     
 }
+
 
 -(void) dealloc{
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
@@ -410,9 +424,11 @@
                 
                 return;
             }
-            [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
-            weakSelf.previewView.hidden = NO;
-            [weakSelf.previewView launchPreview];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
+                weakSelf.previewView.hidden = NO;
+                [weakSelf.previewView launchPreview];
+            });
         }
         else {
             NSLog(@"An error has occured: %@", error);
@@ -466,6 +482,7 @@
                 [weakSelf.previewView launchPreview];
             });
         }else{
+           
             NSLog(@"An error has occured: %@", error);
             dispatch_async(dispatch_get_main_queue(), ^{
                 weakSelf.previewView.hidden = YES;
@@ -505,7 +522,7 @@
 -(NSAttributedString *)timeFormatAttributeString:(double )totalSeconds
 {
     NSMutableParagraphStyle *style =  [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    style.alignment = NSTextAlignmentCenter;
+    style.alignment = NSTextAlignmentRight;
     style.headIndent = 5.0;
     style.firstLineHeadIndent = 5.0;
     style.tailIndent = -5.0;
