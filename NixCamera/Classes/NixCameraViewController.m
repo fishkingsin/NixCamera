@@ -156,9 +156,10 @@
         
         
         
-        
+//        make.rightMargin.mas_equalTo(10);
+//        make.leftMargin.mas_equalTo(10);
         make.height.mas_equalTo(15);
-        
+        make.width.mas_greaterThanOrEqualTo(self.view.width*0.3);
         make.centerX.equalTo(self.view.mas_centerX);
         make.top.equalTo(self.view.mas_top).with.offset(15);
     }];
@@ -482,10 +483,11 @@
 -(NSAttributedString *)timeFormatAttributeString:(double )totalSeconds
 {
     NSMutableParagraphStyle *style =  [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    style.alignment = NSTextAlignmentJustified;
-    style.firstLineHeadIndent = 10.0f;
-    style.headIndent = 10.0f;
-    style.tailIndent = -10.0f;
+    style.alignment = NSTextAlignmentCenter;
+    style.headIndent = 5.0;
+    style.firstLineHeadIndent = 5.0;
+    style.tailIndent = -5.0;
+    
     return [[NSAttributedString alloc] initWithString:[self timeFormatConvertToSeconds:totalSeconds] attributes:@{ NSParagraphStyleAttributeName : style}];
 }
 
