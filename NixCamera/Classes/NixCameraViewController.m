@@ -107,10 +107,12 @@
         }
     }];
     [self.camera setOnRecordingTime:^(double recordedTime, double maxTime) {
-        NSAttributedString* attributedText = [weakSelf timeFormatAttributeString:recordedTime];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.remainTimeLabel setAttributedText:attributedText];
-        });
+        if(weakSelf.camera.isRecording) {
+            NSAttributedString* attributedText = [weakSelf timeFormatAttributeString:recordedTime];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.remainTimeLabel setAttributedText:attributedText];
+            });
+        }
     }];
     
     
@@ -452,6 +454,7 @@
     weakSelf.hintsLabel.hidden = YES;
     
     [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image) {
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             if(self.camera.isFlashAvailable){
                 self.flashButton.hidden = NO;
@@ -501,10 +504,12 @@
 }
 
 - (void)buttonView:(UIView *)button didLongTapEnded:(UITapGestureRecognizer *)tapGes {
-    self.flashButton.hidden = NO;
-    self.switchButton.hidden = NO;
-    self.hintsLabel.hidden = NO;
-    [self.camera stopRecording];
+    if(self.camera.isRecording) {
+        self.flashButton.hidden = NO;
+        self.switchButton.hidden = NO;
+        self.hintsLabel.hidden = NO;
+        [self.camera stopRecording];
+    }
     
 }
 
