@@ -183,7 +183,7 @@ typedef enum : NSUInteger {
 /*
  * Start recording a video with a completion block. Video is saved to the given url.
  */
-- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image))completionBlock;
+- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error))completionBlock;
 
 /**
  * Stop recording video.

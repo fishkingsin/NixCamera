@@ -453,7 +453,7 @@
     weakSelf.switchButton.hidden = YES;
     weakSelf.hintsLabel.hidden = YES;
     
-    [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image) {
+    [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error) {
         
         dispatch_async(dispatch_get_main_queue(), ^{
             if(self.camera.isFlashAvailable){
@@ -473,28 +473,11 @@
                 weakSelf.previewView.hidden = NO;
                 [weakSelf.previewView launchPreview];
             });
-        }else if(image && [error code] == NixCameraErrorCodeVideoTooShort){
-            NSLog(@"An error has occured: %@", error);
-            if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
-                
-                return;
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
-                weakSelf.previewView.hidden = NO;
-                [weakSelf.previewView launchPreview];
-            });
         }else{
            
             NSLog(@"An error has occured: %@", error);
             dispatch_async(dispatch_get_main_queue(), ^{
                 weakSelf.previewView.hidden = YES;
-                if(self.camera.isFlashAvailable){
-                    self.flashButton.hidden = NO;
-                }
-                weakSelf.switchButton.hidden = NO;
-                weakSelf.hintsLabel.hidden = NO;
-                weakSelf.remainTimeLabel.hidden = YES;
             });
         }
         

@@ -27,7 +27,7 @@
 @property (nonatomic, assign) CGFloat beginGestureScale;
 @property (nonatomic, assign) CGFloat effectiveScale;
 @property (strong, nonatomic) dispatch_queue_t sessionQueue;
-@property (nonatomic, copy) void (^didRecordCompletionBlock)(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image);
+@property (nonatomic, copy) void (^didRecordCompletionBlock)(NixCamera *camera, NSURL *outputFileUrl, NSError *error);
 @end
 
 NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
@@ -374,7 +374,7 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
 
 #pragma mark - Video Capture
 
-- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *))completionBlock
+- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error))completionBlock
 {
     //clean up
     
@@ -446,52 +446,11 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
 {
-    CMTime recordDuration = captureOutput.recordedDuration;
-    CMTime minDuration = CMTimeMakeWithSeconds(1, recordDuration.timescale);
-    
     self.recording = NO;
     [self enableTorch:NO];
-    if(!error){
-        if (CMTimeCompare(recordDuration, minDuration) > 0){
-            
-            if(self.didRecordCompletionBlock) {
-                self.didRecordCompletionBlock(self, outputFileURL, error, nil);
-            }
-            
-        }else{
-            AVURLAsset *asset=[[AVURLAsset alloc] initWithURL:outputFileURL options:nil];
-            AVAssetImageGenerator *generator = [[AVAssetImageGenerator alloc] initWithAsset:asset];
-            generator.appliesPreferredTrackTransform=TRUE;
-            
-            CMTime thumbTime = CMTimeMakeWithSeconds(0,30);
-            
-            AVAssetImageGeneratorCompletionHandler handler = ^(CMTime requestedTime, CGImageRef im, CMTime actualTime, AVAssetImageGeneratorResult result, NSError *error){
-                if (result != AVAssetImageGeneratorSucceeded) {
-                    NSLog(@"couldn't generate thumbnail, error:%@", error);
-                    self.didRecordCompletionBlock(self, nil, error , nil);
-                }else{
-                    UIImage *image = [UIImage imageWithCGImage:im];
-                    if(self.didRecordCompletionBlock) {
-                        NSError *error = [NSError errorWithDomain:NixCameraErrorDomain
-                                                             code:NixCameraErrorCodeVideoTooShort
-                                                         userInfo:nil];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            self.didRecordCompletionBlock(self, nil, error , image);
-                        });
-                    }
-                }
-            };
-            
-            CGSize maxSize = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height);
-            
-            generator.maximumSize = maxSize;
-            
-            [generator generateCGImagesAsynchronouslyForTimes:[NSArray arrayWithObject:[NSValue valueWithCMTime:thumbTime]] completionHandler:handler];
-        }
-    }else{
-        if(self.didRecordCompletionBlock) {
-            self.didRecordCompletionBlock(self, nil, error, nil);
-        }
+    
+    if(self.didRecordCompletionBlock) {
+        self.didRecordCompletionBlock(self, outputFileURL, error);
     }
 }
 
