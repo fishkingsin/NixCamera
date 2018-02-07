@@ -126,9 +126,9 @@
     
     if([NixCamera isFrontCameraAvailable] && [NixCamera isRearCameraAvailable]) {
         // button to toggle camera positions
-        self.switchButton = [[UIButton alloc] initWithFrame:CGRectZero];
-        self.switchButton.frame = CGRectMake(0, 0, 29.0f + 20.0f, 22.0f + 20.0f);
-        //self.switchButton.tintColor = [UIColor whiteColor];
+        self.switchButton = [UIButton buttonWithType:UIButtonTypeSystem];
+        self.switchButton.frame = CGRectMake(0, 0,  64, 64);
+        self.switchButton.tintColor = [UIColor whiteColor];
         [self.switchButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera-switch" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
         self.switchButton.imageEdgeInsets = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
         [self.switchButton addTarget:self action:@selector(switchButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
@@ -251,10 +251,11 @@
     self.snapButton.center = self.view.contentCenter;
     self.snapButton.bottom = self.view.bottom - 50.0f;
     
-    self.flashButton.left = 5.0f;
-    self.flashButton.y = self.snapButton.y - 15.0f;
-    self.switchButton.y = self.snapButton.y - 15.0f;
-    self.switchButton.right = self.view.width - 5.0f;
+    self.flashButton.center = self.snapButton.center;
+    self.flashButton.left = self.view.left + 25;
+    
+    self.switchButton.center = self.snapButton.center;
+    self.switchButton.right = self.view.right - 25;
     
 }
 
@@ -360,6 +361,7 @@
         if(done) {
             self.flashButton.selected = YES;
             self.flashButton.tintColor = [UIColor yellowColor];
+            [self.flashButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera_flash_on" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
         }
     }
     else {
@@ -367,6 +369,7 @@
         if(done) {
             self.flashButton.selected = NO;
             self.flashButton.tintColor = [UIColor whiteColor];
+            [self.flashButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera_flash_off" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
         }
     }
 }
@@ -408,9 +411,9 @@
 -(UIButton*) flashButton {
     if(_flashButton != nil) return _flashButton;
     _flashButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    _flashButton.frame = CGRectMake(0, 0, 16.0f + 20.0f, 24.0f + 20.0f);
+    _flashButton.frame = CGRectMake(0, 0, 64, 64);
     _flashButton.tintColor = [UIColor whiteColor];
-    [_flashButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera-flash" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
+    [_flashButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera_flash_off" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
     _flashButton.imageEdgeInsets = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
     [_flashButton addTarget:self action:@selector(flashButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
     return _flashButton;
