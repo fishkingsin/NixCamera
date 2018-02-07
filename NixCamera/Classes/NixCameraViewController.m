@@ -340,6 +340,13 @@
 {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
+
+- (NSURL *)applicationTmpDirectory
+{
+    
+    return [NSURL fileURLWithPath:NSTemporaryDirectory()];
+}
+
 - (void)cancelButtonPressed:(UIButton *)button
 {
     if (_delegate && [_delegate respondsToSelector:@selector(cameraViewControllerDidDismissed:)]) {
@@ -445,8 +452,8 @@
 
     self.remainTimeLabel.attributedText = [self timeFormatAttributeString:0];
     self.remainTimeLabel.hidden = NO;
-    
-    NSURL *outputURL = [[[self applicationDocumentsDirectory]
+    //store tmp folder instead
+    NSURL *outputURL = [[[self applicationTmpDirectory]
                          URLByAppendingPathComponent:[self timeStamp]] URLByAppendingPathExtension:@"mov"];
     __weak typeof(self) weakSelf = self;
     weakSelf.flashButton.hidden = YES;
