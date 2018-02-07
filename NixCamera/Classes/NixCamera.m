@@ -27,7 +27,7 @@
 @property (nonatomic, assign) CGFloat beginGestureScale;
 @property (nonatomic, assign) CGFloat effectiveScale;
 @property (strong, nonatomic) dispatch_queue_t sessionQueue;
-@property (nonatomic, copy) void (^didRecordCompletionBlock)(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image);
+@property (nonatomic, copy) void (^didRecordCompletionBlock)(NixCamera *camera, NSURL *outputFileUrl, NSError *error);
 @end
 
 NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
@@ -261,10 +261,9 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
                 [self.session addInput:_audioDeviceInput];
             }
             
-            _movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
-            [_movieFileOutput setMovieFragmentInterval:kCMTimeInvalid];
-            if([self.session canAddOutput:_movieFileOutput]) {
-                [self.session addOutput:_movieFileOutput];
+            
+            if([self.session canAddOutput:self.movieFileOutput]) {
+                [self.session addOutput:self.movieFileOutput];
             }
         }
         
@@ -285,7 +284,12 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
     
     [self.session startRunning];
 }
-
+-(AVCaptureMovieFileOutput*) movieFileOutput{
+    if(_movieFileOutput) return _movieFileOutput;
+    _movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
+    [_movieFileOutput setMovieFragmentInterval:kCMTimeInvalid];
+    return _movieFileOutput;
+}
 - (void)stop
 {
     [self.session stopRunning];
@@ -297,6 +301,7 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
 
 -(void)capture:(void (^)(NixCamera *camera, UIImage *image, NSDictionary *metadata, NSError *error))onCapture exactSeenImage:(BOOL)exactSeenImage animationBlock:(void (^)(AVCaptureVideoPreviewLayer *))animationBlock
 {
+    
     if(!self.session) {
         NSError *error = [NSError errorWithDomain:NixCameraErrorDomain
                                              code:NixCameraErrorCodeSession
@@ -369,8 +374,10 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
 
 #pragma mark - Video Capture
 
-- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *))completionBlock
+- (void)startRecordingWithOutputUrl:(NSURL *)url didRecord:(void (^)(NixCamera *camera, NSURL *outputFileUrl, NSError *error))completionBlock
 {
+    //clean up
+    
     // check if video is enabled
     if(!self.videoEnabled) {
         NSError *error = [NSError errorWithDomain:NixCameraErrorDomain
@@ -412,9 +419,12 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
     dispatch_async( self.sessionQueue, ^{ // Background task started
         // While the movie is recording, update the progress bar
         while (self.movieFileOutput.isRecording) {
-            double duration = CMTimeGetSeconds(self.movieFileOutput.recordedDuration);
-            double time = CMTimeGetSeconds(self.movieFileOutput.maxRecordedDuration);
-            if(self.onRecordingTime) self.onRecordingTime(duration,time);
+            //seems buggy here , if record very short video, movieFileOutput will recognise as recording , need to stop it
+            if(_recording){
+                double duration = CMTimeGetSeconds(self.movieFileOutput.recordedDuration);
+                double time = CMTimeGetSeconds(self.movieFileOutput.maxRecordedDuration);
+                if(self.onRecordingTime) self.onRecordingTime(duration,time);
+            }
         }
     });
 }
@@ -425,6 +435,7 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
     }
     
     [self.movieFileOutput stopRecording];
+    
 }
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didStartRecordingToOutputFileAtURL:(NSURL *)fileURL fromConnections:(NSArray *)connections
@@ -435,50 +446,11 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
 {
-    CMTime recordDuration = captureOutput.recordedDuration;
-    CMTime minDuration = CMTimeMakeWithSeconds(1, recordDuration.timescale);
-    [self removeObserver:self
-              forKeyPath:@"movieFileOutput.recording"];
-    if (CMTimeCompare(recordDuration, minDuration) > 0){
-        
-        
-        self.recording = NO;
-        [self enableTorch:NO];
-        
-        
-        
-        if(self.didRecordCompletionBlock) {
-            self.didRecordCompletionBlock(self, outputFileURL, error, nil);
-        }
-        
-    }else{
-        AVURLAsset *asset=[[AVURLAsset alloc] initWithURL:outputFileURL options:nil];
-        AVAssetImageGenerator *generator = [[AVAssetImageGenerator alloc] initWithAsset:asset];
-        generator.appliesPreferredTrackTransform=TRUE;
-        
-        CMTime thumbTime = CMTimeMakeWithSeconds(0,30);
-        
-        AVAssetImageGeneratorCompletionHandler handler = ^(CMTime requestedTime, CGImageRef im, CMTime actualTime, AVAssetImageGeneratorResult result, NSError *error){
-            if (result != AVAssetImageGeneratorSucceeded) {
-                NSLog(@"couldn't generate thumbnail, error:%@", error);
-                self.didRecordCompletionBlock(self, nil, error , nil);
-            }
-            UIImage *image = [UIImage imageWithCGImage:im];
-            if(self.didRecordCompletionBlock) {
-                NSError *error = [NSError errorWithDomain:NixCameraErrorDomain
-                                                     code:NixCameraErrorCodeVideoTooShort
-                                                 userInfo:nil];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.didRecordCompletionBlock(self, nil, error , image);
-                });
-            }
-        };
-        
-        CGSize maxSize = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height);
-        
-        generator.maximumSize = maxSize;
-        
-        [generator generateCGImagesAsynchronouslyForTimes:[NSArray arrayWithObject:[NSValue valueWithCMTime:thumbTime]] completionHandler:handler];
+    self.recording = NO;
+    [self enableTorch:NO];
+    
+    if(self.didRecordCompletionBlock) {
+        self.didRecordCompletionBlock(self, outputFileURL, error);
     }
 }
 
@@ -613,7 +585,7 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
         return;
     }
     
-    AVCaptureConnection *videoConnection = [_movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
+    AVCaptureConnection *videoConnection = [self.movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
     AVCaptureConnection *pictureConnection = [_StillImageOutput connectionWithMediaType:AVMediaTypeVideo];
     
     switch (mirror) {

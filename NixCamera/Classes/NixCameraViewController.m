@@ -107,10 +107,12 @@
         }
     }];
     [self.camera setOnRecordingTime:^(double recordedTime, double maxTime) {
-        NSAttributedString* attributedText = [weakSelf timeFormatAttributeString:recordedTime];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.remainTimeLabel setAttributedText:attributedText];
-        });
+        if(weakSelf.camera.isRecording) {
+            NSAttributedString* attributedText = [weakSelf timeFormatAttributeString:recordedTime];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.remainTimeLabel setAttributedText:attributedText];
+            });
+        }
     }];
     
     
@@ -151,23 +153,47 @@
         //make.centerX.equalTo(self.view.mas_centerX);
         make.bottom.equalTo(self.view.mas_bottom).with.offset(-15);
     }];
-    
+    self.remainTimeLabel.text = @"00:00:00";
+    [self.remainTimeLabel sizeToFit];
+    [self.remainTimeLabel setNeedsFocusUpdate];
+    float miniWidth = self.remainTimeLabel.frame.size.width;
     [self.remainTimeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         
-        
-        
-//        make.rightMargin.mas_equalTo(10);
-//        make.leftMargin.mas_equalTo(10);
-        make.height.mas_equalTo(15);
-        make.width.mas_greaterThanOrEqualTo(self.view.width*0.3);
+        make.height.mas_equalTo(20);
+        make.width.mas_greaterThanOrEqualTo(miniWidth+25);
         make.centerX.equalTo(self.view.mas_centerX);
         make.top.equalTo(self.view.mas_top).with.offset(15);
     }];
 
     
+    UIView *circleView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
+    circleView.backgroundColor = [UIColor redColor];
+    
+    CAShapeLayer *shape = [CAShapeLayer layer];
+    UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:circleView.center radius:(circleView.bounds.size.width / 2) startAngle:0 endAngle:(2 * M_PI) clockwise:YES];
+    shape.path = path.CGPath;
+    circleView.layer.mask = shape;
+    [self.remainTimeLabel addSubview:circleView];
+    
+    [circleView mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        make.width.mas_greaterThanOrEqualTo(12);
+        make.height.mas_greaterThanOrEqualTo(12);
+        make.centerY.equalTo(self.remainTimeLabel.mas_centerY);
+        make.left.equalTo(self.remainTimeLabel.mas_left).with.offset(5);
+    }];
+    
+    circleView.alpha = 1.0f;
+    [UIView animateKeyframesWithDuration:2.0 delay:0.0 options:UIViewKeyframeAnimationOptionAutoreverse | UIViewKeyframeAnimationOptionRepeat animations:^{
+        [UIView addKeyframeWithRelativeStartTime:0.0 relativeDuration:0.5 animations:^{
+            circleView.alpha = 0.0f;
+        }];
+        [UIView addKeyframeWithRelativeStartTime:0.5 relativeDuration:0.5 animations:^{
+            circleView.alpha = 1.0f;
+        }];
+    } completion:nil];
     
     [self.view addSubview:self.cancelButton];
-    self.cancelButton.frame = CGRectMake(0, 0, 44, 44);
     [self onOrientationChange];
     
     //    [self.snapButton mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -199,6 +225,7 @@
     //    self.switchButton.autoresizingMask = ( UIViewAutoresizingFlexibleTopMargin);
     
 }
+
 
 -(void) dealloc{
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
@@ -399,9 +426,11 @@
                 
                 return;
             }
-            [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
-            weakSelf.previewView.hidden = NO;
-            [weakSelf.previewView launchPreview];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
+                weakSelf.previewView.hidden = NO;
+                [weakSelf.previewView launchPreview];
+            });
         }
         else {
             NSLog(@"An error has occured: %@", error);
@@ -424,9 +453,12 @@
     weakSelf.switchButton.hidden = YES;
     weakSelf.hintsLabel.hidden = YES;
     
-    [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error, UIImage *image) {
+    [self.camera startRecordingWithOutputUrl:outputURL didRecord:^(NixCamera *camera, NSURL *outputFileUrl, NSError *error) {
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            weakSelf.flashButton.hidden = NO;
+            if(self.camera.isFlashAvailable){
+                self.flashButton.hidden = NO;
+            }
             weakSelf.switchButton.hidden = NO;
             weakSelf.hintsLabel.hidden = NO;
             weakSelf.remainTimeLabel.hidden = YES;
@@ -441,19 +473,12 @@
                 weakSelf.previewView.hidden = NO;
                 [weakSelf.previewView launchPreview];
             });
-        }else if(image){
-            NSLog(@"An error has occured: %@", error);
-            if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
-                
-                return;
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf.previewView showMediaContentImage:image withType:Enum_StillImage];
-                weakSelf.previewView.hidden = NO;
-                [weakSelf.previewView launchPreview];
-            });
         }else{
+           
             NSLog(@"An error has occured: %@", error);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                weakSelf.previewView.hidden = YES;
+            });
         }
         
         
@@ -462,10 +487,12 @@
 }
 
 - (void)buttonView:(UIView *)button didLongTapEnded:(UITapGestureRecognizer *)tapGes {
-    self.flashButton.hidden = NO;
-    self.switchButton.hidden = NO;
-    self.hintsLabel.hidden = NO;
-    [self.camera stopRecording];
+    if(self.camera.isRecording) {
+        self.flashButton.hidden = NO;
+        self.switchButton.hidden = NO;
+        self.hintsLabel.hidden = NO;
+        [self.camera stopRecording];
+    }
     
 }
 
@@ -483,7 +510,7 @@
 -(NSAttributedString *)timeFormatAttributeString:(double )totalSeconds
 {
     NSMutableParagraphStyle *style =  [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    style.alignment = NSTextAlignmentCenter;
+    style.alignment = NSTextAlignmentRight;
     style.headIndent = 5.0;
     style.firstLineHeadIndent = 5.0;
     style.tailIndent = -5.0;
@@ -539,7 +566,7 @@
 - (UIButton *)cancelButton {
     if(!_cancelButton) {
         UIImage *cancelImage = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_cancel" ofType:@"png" inBundle:BUNDLE];
-        UIButton *button = [[UIButton alloc]initWithFrame:CGRectZero];
+        UIButton *button = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
         [button setImage:cancelImage forState:UIControlStateNormal];
         button.imageView.clipsToBounds = NO;
         button.contentEdgeInsets = UIEdgeInsetsMake(10, 10, 10, 10);
