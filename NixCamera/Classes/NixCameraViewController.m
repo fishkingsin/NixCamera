@@ -91,8 +91,8 @@
                 }
                 
                 UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-                
-                label.text = NSLocalizedStringFromTableInBundle(@"Access to the camera has been prohibited; please enable it in the Settings app to continue.", @"NixCamera", [NSBundle bundleForClass:[weakSelf class]], @"Access to the camera has been prohibited; please enable it in the Settings app to continue.");
+                NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle bundleForClass:[NixCameraViewController class]] URLForResource:@"NixCamera" withExtension:@"bundle"]];
+                label.text = NSLocalizedStringFromTableInBundle(@"camera-permission-alert-message", @"NixCamera", bundle, @"Access to the camera has been prohibited; please enable it in the Settings app to continue.");
                 label.numberOfLines = 2;
                 label.lineBreakMode = NSLineBreakByWordWrapping;
                 label.backgroundColor = [UIColor clearColor];
@@ -554,9 +554,18 @@
     if(_hintsLabel) return _hintsLabel;
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
     label = [[UILabel alloc] initWithFrame:CGRectZero];
+  
+    NSLog(@"A key: %@", NSLocalizedString(@"A key", nil));
+    NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle bundleForClass:[NixCameraViewController class]] URLForResource:@"NixCamera" withExtension:@"bundle"]];
+    NSLog(@"Current locale: %@", [[NSLocale currentLocale] localeIdentifier]);
+    NSLog(@"Bundle localizations: %@", [bundle localizations]);
+    NSLog(@"Key from bundle: %@", [bundle localizedStringForKey: @"camera-snap-button-hints-label" value: @"Can't find it." table: nil]);
+    NSLog(@"Key using bundle macro: %@", NSLocalizedStringFromTableInBundle(@"camera-snap-button-hints-label",
+                                                                            nil,
+                                                                            bundle,
+                                                                            nil));
     
-    
-    label.text = [NSString stringWithFormat: NSLocalizedStringFromTableInBundle(@"Hold for video (%d seconds max.), tap for photo", @"NixCamera", BUNDLE, @"Hold for video (n seconds max.), tap for photo"), self.camera.maximumVideoDuration];
+    label.text = [NSString stringWithFormat: NSLocalizedStringFromTableInBundle(@"camera-snap-button-hints-label", @"NixCamera", bundle, @"Hold for video (n seconds max.), tap for photo"), @(self.camera.maximumVideoDuration)];
     label.numberOfLines = 2;
     label.lineBreakMode = NSLineBreakByWordWrapping;
     [label.layer setBackgroundColor:[[UIColor colorWithWhite:0 alpha:0.3] CGColor]];
