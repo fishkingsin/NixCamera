@@ -21,11 +21,11 @@ Pod::Spec.new do |s|
   Simple Fast camera inspire by LLSimpleCamera
                        DESC
 
-  s.homepage         = 'https://github.com/fishkingsin/NixCamera.git'
+  s.homepage         = 'https://github.com/fishkingsin/NixCamera'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'fishkingsin@gmail.com' => 'james.kong@nixplay.com' }
-  s.source           = { :git => 'https://github.com/fishkingsin@gmail.com/NixCamera.git', :tag => s.version.to_s }
+  s.author           = { 'James Kong' => 'fishkingsin@gmail.com' }
+  s.source           = { :git => 'https://github.com/fishkingsin/NixCamera.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
   s.resource_bundles = {
       'NixCamera' => ['NixCamera/Assets/*.png', 'NixCamera/Assets/*.lproj']
