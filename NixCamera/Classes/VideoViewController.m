@@ -133,6 +133,11 @@
 	[self.navigationController popViewControllerAnimated:YES];
 }
 
+- (void)confirmButtonPressed:(UIButton *)button {
+    NSLog(@"confirm button pressed!");
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 - (void)didReceiveMemoryWarning {
 	[super didReceiveMemoryWarning];
 	// Dispose of any resources that can be recreated.

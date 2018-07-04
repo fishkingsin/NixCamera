@@ -245,15 +245,15 @@ static int count = 0;
 	uint64_t interval = 0.01 * NSEC_PER_SEC;
 	dispatch_source_set_timer(timer, start, interval, 0);
 	dispatch_source_set_event_handler(timer, ^{
-		if (count > (_videoInterval*100)) {
-			[circleProgressView setProgress:1.0];
+		if (count > (weakSelf.videoInterval*100)) {
+			[weakSelf.circleProgressView setProgress:1.0];
 			[weakSelf captureVideoOver];
 
 			return;
 		}
 		count += 1;
-		CGFloat rate = (CGFloat)count/(_videoInterval*100);
-		[circleProgressView setProgress:rate];
+		CGFloat rate = (CGFloat)count/(weakSelf.videoInterval*100);
+		[weakSelf.circleProgressView setProgress:rate];
 		isEffectiveVideo = count >= 10;
 		//
 	});

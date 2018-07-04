@@ -354,6 +354,9 @@
         [_delegate cameraViewControllerDidDismissed:self];
     }
 }
+- (void)confirmButtonPressed:(UIButton *)button
+{
+}
 - (void)flashButtonPressed:(UIButton *)button
 {
     if(self.camera.flash == NixCameraFlashOff) {
@@ -389,9 +392,9 @@
     return UIInterfaceOrientationPortrait ;
 }
 
--(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    return (interfaceOrientation == UIInterfaceOrientationPortrait) ;
-}
+//-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+//    return (interfaceOrientation == UIInterfaceOrientationPortrait) ;
+//}
 
 
 - (void)didReceiveMemoryWarning
