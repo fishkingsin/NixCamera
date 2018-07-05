@@ -265,7 +265,8 @@ static int count = 0;
 }
 
 - (CGPoint)thisCenter {
-	return CGPointMake(self.frame.size.width * 0.5, self.frame.size.height *0.5);
+    return CGPointMake(self.frame.size.width * 0.5, self.frame.size.height *0.5);
+//    return CGPointMake(0,0);
 }
 
 @end

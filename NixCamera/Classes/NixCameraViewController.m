@@ -127,7 +127,7 @@
     if([NixCamera isFrontCameraAvailable] && [NixCamera isRearCameraAvailable]) {
         // button to toggle camera positions
         self.switchButton = [UIButton buttonWithType:UIButtonTypeSystem];
-        self.switchButton.frame = CGRectMake(0, 0,  64, 64);
+        self.switchButton.frame = CGRectMake(0, 0,  52, 52);
         self.switchButton.tintColor = [UIColor whiteColor];
         [self.switchButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera-switch" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
         self.switchButton.imageEdgeInsets = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
@@ -151,7 +151,12 @@
         make.height.mas_equalTo(15);
         
         //make.centerX.equalTo(self.view.mas_centerX);
-        make.bottom.equalTo(self.view.mas_bottom).with.offset(-15);
+        if (@available(iOS 11, *)) {
+            make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom).with.offset(-5);
+        } else {
+            make.bottom.equalTo(self.view.mas_bottom).with.offset(-5);
+        }
+        
     }];
     self.remainTimeLabel.text = @"00:00:00";
     [self.remainTimeLabel sizeToFit];
@@ -162,7 +167,11 @@
         make.height.mas_equalTo(20);
         make.width.mas_greaterThanOrEqualTo(miniWidth+25);
         make.centerX.equalTo(self.view.mas_centerX);
-        make.top.equalTo(self.view.mas_top).with.offset(15);
+        if (@available(iOS 11, *)) {
+            make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop).with.offset(15);
+        } else {
+            make.top.equalTo(self.view.mas_top).with.offset(15);
+        }
     }];
 
     
@@ -174,13 +183,14 @@
     shape.path = path.CGPath;
     circleView.layer.mask = shape;
     [self.remainTimeLabel addSubview:circleView];
-    
     [circleView mas_makeConstraints:^(MASConstraintMaker *make) {
         
         make.width.mas_greaterThanOrEqualTo(12);
         make.height.mas_greaterThanOrEqualTo(12);
         make.centerY.equalTo(self.remainTimeLabel.mas_centerY);
         make.left.equalTo(self.remainTimeLabel.mas_left).with.offset(5);
+        
+        
     }];
     
     circleView.alpha = 1.0f;
@@ -194,6 +204,17 @@
     } completion:nil];
     
     [self.view addSubview:self.cancelButton];
+    [self.cancelButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(44);
+        make.height.mas_equalTo(44);
+        if (@available(iOS 11, *)) {
+            make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop).with.offset(5);
+            make.left.equalTo(self.view.mas_safeAreaLayoutGuideLeft).with.offset(5);
+        } else {
+            make.top.equalTo(self.remainTimeLabel.mas_top).with.offset(5);
+            make.left.equalTo(self.remainTimeLabel.mas_left).with.offset(5);
+        }
+    }];
     [self onOrientationChange];
     
     //    [self.snapButton mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -404,7 +425,11 @@
 - (CircleButtonView *)snapButton {
     if(_snapButton != nil) return _snapButton;
     CircleButtonView *view = [[CircleButtonView alloc] initWithFrame:CGRectMake(0, 0, 65, 65)];
-    view.center = CGPointMake(self.view.center.x, UIScreen.mainScreen.bounds.size.height - 26 - self.view.frame.size.height * 0.5);
+    if (@available(iOS 11.0, *)) {
+        view.center = CGPointMake(self.view.center.x, UIScreen.mainScreen.bounds.size.height - 26 - self.view.frame.size.height * 0.5 - self.view.safeAreaInsets.bottom);
+    } else {
+        view.center = CGPointMake(self.view.center.x, UIScreen.mainScreen.bounds.size.height - 26 - self.view.frame.size.height * 0.5);
+    }
     view.delegate = self;
     view.videoInterval =  self.camera.maximumVideoDuration;
     _snapButton = view;
@@ -414,7 +439,7 @@
 -(UIButton*) flashButton {
     if(_flashButton != nil) return _flashButton;
     _flashButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    _flashButton.frame = CGRectMake(0, 0, 64, 64);
+    _flashButton.frame = CGRectMake(0, 0, 52, 52);
     _flashButton.tintColor = [UIColor whiteColor];
     [_flashButton setImage:[UIImage imageForResourcePath:@"NixCamera.bundle/camera_flash_off" ofType:@"png" inBundle:BUNDLE] forState:UIControlStateNormal];
     _flashButton.imageEdgeInsets = UIEdgeInsetsMake(10.0f, 10.0f, 10.0f, 10.0f);
@@ -476,7 +501,7 @@
             weakSelf.hintsLabel.hidden = NO;
             weakSelf.remainTimeLabel.hidden = YES;
         });
-        if(!error) {
+        if(!error || (error.code == -11810 && error.userInfo[AVErrorRecordingSuccessfullyFinishedKey])) {
             if (![weakSelf.previewView conformsToProtocol:@protocol(CameraPreviewViewProtocol)]) {
                 
                 return;
@@ -588,7 +613,7 @@
 - (UIButton *)cancelButton {
     if(!_cancelButton) {
         UIImage *cancelImage = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_cancel" ofType:@"png" inBundle:BUNDLE];
-        UIButton *button = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
+        UIButton *button = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 32, 44)];
         [button setImage:cancelImage forState:UIControlStateNormal];
         button.imageView.clipsToBounds = NO;
         button.contentEdgeInsets = UIEdgeInsetsMake(10, 10, 10, 10);
