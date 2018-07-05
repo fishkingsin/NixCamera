@@ -71,12 +71,12 @@
 
 	__block CGFloat bottomRate = CIRCLE_RATE;//self.frame.size.width / bottomImageView.frame.size.width;
 	[UIView animateWithDuration:0.2 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
-		bottomImageView.transform = CGAffineTransformMakeScale(bottomRate, bottomRate);
-		bottomImageView.center = self.thisCenter;
+		self.bottomImageView.transform = CGAffineTransformMakeScale(bottomRate, bottomRate);
+		self.bottomImageView.center = self.thisCenter;
 		//
-		topImageView.transform = CGAffineTransformMakeScale(0.8, 0.8);
-        topImageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top_recording" ofType:@"png" inBundle:BUNDLE];
-		topImageView.center = self.thisCenter;
+		self.topImageView.transform = CGAffineTransformMakeScale(0.8, 0.8);
+        self.topImageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top_recording" ofType:@"png" inBundle:BUNDLE];
+		self.topImageView.center = self.thisCenter;
 	} completion:^(BOOL finished) {
 		[self start];
 	}];
@@ -85,16 +85,16 @@
 - (void)restoreFrame {
 
 	[UIView animateWithDuration:0.1 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
-		bottomImageView.transform = CGAffineTransformMakeScale(1.0, 1.0);
-		bottomImageView.frame = CGRectMake(0, 0, bottomImageViewOriginSize.width, bottomImageViewOriginSize.height);
-		bottomImageView.center = self.thisCenter;
+		self.bottomImageView.transform = CGAffineTransformMakeScale(1.0, 1.0);
+		self.bottomImageView.frame = CGRectMake(0, 0, bottomImageViewOriginSize.width, bottomImageViewOriginSize.height);
+		self.bottomImageView.center = self.thisCenter;
 		//
-		topImageView.transform = CGAffineTransformMakeScale(1.0, 1.0);
-		topImageView.frame = CGRectMake(0, 0, topImageViewOriginSize.width, topImageViewOriginSize.height);
-		topImageView.center = self.thisCenter;
+		self.topImageView.transform = CGAffineTransformMakeScale(1.0, 1.0);
+		self.topImageView.frame = CGRectMake(0, 0, topImageViewOriginSize.width, topImageViewOriginSize.height);
+		self.topImageView.center = self.thisCenter;
         
 	} completion:^(BOOL finished) {
-        topImageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top" ofType:@"png" inBundle:BUNDLE];
+        self.topImageView.image = [UIImage imageForResourcePath:@"NixCamera.bundle/camera_action_top" ofType:@"png" inBundle:BUNDLE];
 	}];
 }
 #pragma mark -- tap event

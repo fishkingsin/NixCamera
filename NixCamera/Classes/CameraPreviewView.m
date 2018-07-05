@@ -151,12 +151,12 @@
                 NSLog(@"delegate empty， can not can not reuturn select photo or video");;
                 return;
             }
-            if (Enum_StillImage == contentType && stillImageView.image) {
+            if (Enum_StillImage == contentType && self.stillImageView.image) {
                 if (![_delegate respondsToSelector:@selector(preview:captureStillImage:)]) {
                     NSLog(@"delegate is not response to selector preview:captureStillImage:");
                     return;
                 }
-                [_delegate preview:self captureStillImage:stillImageView.image];
+                [_delegate preview:self captureStillImage: self.stillImageView.image];
                 [self clearContent:YES];
                 return;
             }
