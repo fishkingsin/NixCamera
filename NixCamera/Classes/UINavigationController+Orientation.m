@@ -20,8 +20,8 @@
     return [self.visibleViewController preferredInterfaceOrientationForPresentation];
 }
 
--(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    return [self.visibleViewController shouldAutorotateToInterfaceOrientation:interfaceOrientation];
-}
+//-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+//    return [self.visibleViewController shouldAutorotateToInterfaceOrientation:interfaceOrientation];
+//}
 
 @end

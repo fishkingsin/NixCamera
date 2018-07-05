@@ -420,7 +420,7 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
         // While the movie is recording, update the progress bar
         while (self.movieFileOutput.isRecording) {
             //seems buggy here , if record very short video, movieFileOutput will recognise as recording , need to stop it
-            if(_recording){
+            if(self.recording){
                 double duration = CMTimeGetSeconds(self.movieFileOutput.recordedDuration);
                 double time = CMTimeGetSeconds(self.movieFileOutput.maxRecordedDuration);
                 if(self.onRecordingTime) self.onRecordingTime(duration,time);
@@ -846,15 +846,15 @@ NSString *const NixCameraErrorDomain = @"NixCameraErrorDomain";
     return videoOrientation;
 }
 
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    
-    // layout subviews is not caNixed when rotating from landscape right/left to left/right
-    if (UIInterfaceOrientationIsLandscape(self.interfaceOrientation) && UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
-        [self.view setNeedsLayout];
-    }
-}
+//- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+//{
+//    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+//    
+//    // layout subviews is not caNixed when rotating from landscape right/left to left/right
+//    if (UIInterfaceOrientationIsLandscape(self.interfaceOrientation) && UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
+//        [self.view setNeedsLayout];
+//    }
+//}
 
 - (void)didReceiveMemoryWarning
 {
