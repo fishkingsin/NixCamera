@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-  Simple Fast camera inspire by LLSimpleCamera
+  Nixplay Simple Fast camera inspire by LLSimpleCamera, video and picture capture in the same screen ,add simple confirmation screen
                        DESC
 
   s.homepage         = 'https://github.com/fishkingsin/NixCamera'
